@@ -2,27 +2,28 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDate;
+
 public class Server {
+    private static final int PORT = 12345;
+
     public static void main(String[] args) {
         // Instancia o server socket na porta 12345
 
-        try(ServerSocket server = new ServerSocket(12345)) {
-            System.out.println("Servidor ouvindo na porta 12345");
+
+        try(ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Servidor Iniciado na porta" + PORT + ". Aguardando conexões...");
+
             while(true){
                 // Accept() bloqueia a execução até que o servidor receba um pedido de conexão
-                ClientHandler handler = new ClientHandler(server.accept());
-                Thread client = new Thread(handler);
-                Socket client = server.accept();
-                client.start();
-                System.out.println("Cliente conectado: "+client.getInetAddress().getHostAddress());
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Novo cliente conectado: " + clientSocket.getInetAddress().getHostAddress() + " na porta " + clientSocket.getPort());
 
-                ObjectOutputStream saida = new ObjectOutputStream(client.getOutputStream());
-                saida.flush();
-                saida.writeObject("hello");
+                // Criar um clientHandler para processar o cliente
+                ClientHandler clientHandler = new ClientHandler(clientSocket);
 
-                saida.close();
-                client.close();
+                //Inicia o handler numa nova Thread
+                Thread thread = new Thread(clientHandler);
+                thread.start();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
