@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -8,7 +7,6 @@ public class Server {
 
     public static void main(String[] args) {
         // Instancia o server socket na porta 12345
-
 
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Servidor Iniciado na porta" + PORT + ". Aguardando conexões...");
@@ -26,7 +24,7 @@ public class Server {
                 thread.start();
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
         }
     }
 }
