@@ -2,9 +2,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
-
-public class server {
+import java.time.LocalDate;
+public class Server {
     public static void main(String[] args) {
         // Instancia o server socket na porta 12345
 
@@ -14,11 +13,14 @@ public class server {
                 // Accept() bloqueia a execução até que o servidor receba um pedido de conexão
 
                 Socket client = server.accept();
+                new Thread(new ClientHandler(client)).start();
                 System.out.println("Cliente conectado: "+client.getInetAddress().getHostAddress());
 
                 ObjectOutputStream saida = new ObjectOutputStream(client.getOutputStream());
                 saida.flush();
-                saida.writeObject(new Date());
+                LocalDate myObj = LocalDate.now();
+                saida.writeObject("hello");
+
                 saida.close();
                 client.close();
             }
