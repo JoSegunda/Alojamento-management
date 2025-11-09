@@ -11,14 +11,14 @@ public class Server {
             System.out.println("Servidor ouvindo na porta 12345");
             while(true){
                 // Accept() bloqueia a execução até que o servidor receba um pedido de conexão
-
+                ClientHandler handler = new ClientHandler(server.accept());
+                Thread client = new Thread(handler);
                 Socket client = server.accept();
-                new Thread(new ClientHandler(client)).start();
+                client.start();
                 System.out.println("Cliente conectado: "+client.getInetAddress().getHostAddress());
 
                 ObjectOutputStream saida = new ObjectOutputStream(client.getOutputStream());
                 saida.flush();
-                LocalDate myObj = LocalDate.now();
                 saida.writeObject("hello");
 
                 saida.close();
