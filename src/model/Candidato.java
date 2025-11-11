@@ -5,20 +5,24 @@ public class Candidato {
     private String nome;
     private String email;
     private String telefone;
+    private String sexo;
+    private String curso;
 
     // Construtor para novo candidato
-    public Candidato(String nome, String email, String telefone){
+    public Candidato(String nome, String email, String telefone, String sexo){
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
     }
 
     //Construtor completo
-    public Candidato(int id, String nome, String email, String telefone){
+    public Candidato(int id, String nome, String email, String telefone, String sexo, String curso){
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
+        this.sexo = sexo;
+        this.curso = curso;
     }
 
     // Getters e Setters
@@ -33,6 +37,12 @@ public class Candidato {
 
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
+
+    public String getSexo() { return sexo; }
+    public void setSexo(String sexo) { this.sexo = sexo; }
+
+    public String getCurso() { return telefone; }
+    public void setCurso(String curso) { this.curso = curso; }
 
     @Override
     public String toString(){
