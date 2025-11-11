@@ -14,5 +14,11 @@ public class DatabaseConnection {
     private DatabaseConnection(){
         // Construtor privado para impedir instanciação externa
     }
+    /**
+     * Obtém a instância da conexão. Conecta-se se a conexão não estiver ativa.
+     * @return Uma conexão ativa com o banco de dados.
+     * @throws SQLException Se ocorrer um erro de conexão.
+     */
+
 
 }
