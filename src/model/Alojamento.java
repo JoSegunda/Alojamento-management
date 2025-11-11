@@ -3,22 +3,25 @@ package model;
 public class Alojamento {
     private int id;
     private String nome;
-    private String morada;
+    private String cidade;
+    private String codPostal;
     private int capacidade;
     private String estado; //EX: "pendente","Aprovado","recusado","incompleto"
 
-    public Alojamento(String nome, String morada, int capacidade){
+    public Alojamento(String nome, String cidade, String codPostal, int capacidade){
         this.nome = nome;
-        this.morada = morada;
+        this.cidade = cidade;
+        this.codPostal = codPostal;
         this.capacidade = capacidade;
         this.estado = "Pendente"; //Estado inicial
     }
 
     // Construtor ao ler a base de dados
-    public Alojamento(int id,String nome, String morada, int capacidade, String estado){
+    public Alojamento(int id,String nome, String cidade, String codPostal, int capacidade, String estado){
         this.id = id;
         this.nome = nome;
-        this.morada = morada;
+        this.cidade = cidade;
+        this.codPostal = codPostal;
         this.capacidade = capacidade;
         this.estado = estado;
     }
@@ -30,8 +33,11 @@ public class Alojamento {
     public String getNome(){return nome; }
     public void setNome(String Nome){this.nome = Nome; }
 
-    public String getMorada(){return morada; }
-    public void setMorada(String Morada){this.morada = Morada; }
+    public String getCidade(){return cidade; }
+    public void setCidade(String cidade){this.cidade = cidade; }
+
+    public String getCodPostal(){return codPostal; }
+    public void setCodPostal(String cidade){this.codPostal = codPostal; }
 
     public int getCapacidade(){return capacidade; }
     public void getCapacidade(int Capacidade){this.capacidade = Capacidade; }
@@ -41,7 +47,7 @@ public class Alojamento {
 
     @Override
     public String toString(){
-        return "Alojamento "+nome+"\nId: "+id+"\nMorada: "+morada+"\nEstado: "+estado;
+        return "Alojamento "+nome+"\nId: "+id+"\ncidade: "+cidade+"\nEstado: "+estado;
     }
 
 }
