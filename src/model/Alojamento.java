@@ -4,26 +4,26 @@ public class Alojamento {
     private int id;
     private String nome;
     private String cidade;
-    private String codPostal;
+    private boolean activo;
     private int capacidade;
-    private String estado; //EX: "pendente","Aprovado","recusado","incompleto"
+    public enum estado{ PENDENTE, APROVADO, RECUSADO, INCOMPLETO };
 
-    public Alojamento(String nome, String cidade, String codPostal, int capacidade){
+    public Alojamento(String nome, String cidade, int capacidade, boolean activo){
         this.nome = nome;
         this.cidade = cidade;
-        this.codPostal = codPostal;
+        this.activo = activo;
         this.capacidade = capacidade;
-        this.estado = "Pendente"; //Estado inicial
+        //this.estado = "Pendente"; //Estado inicial
     }
 
     // Construtor ao ler a base de dados
-    public Alojamento(int id,String nome, String cidade, String codPostal, int capacidade, String estado){
+    public Alojamento(int id,String nome, String cidade,boolean activo, int capacidade, String estado){
         this.id = id;
         this.nome = nome;
         this.cidade = cidade;
-        this.codPostal = codPostal;
+        this.activo = activo;
         this.capacidade = capacidade;
-        this.estado = estado;
+        //this.estado = estado;
     }
 
     // Getters e Setters
@@ -36,18 +36,18 @@ public class Alojamento {
     public String getCidade(){return cidade; }
     public void setCidade(String cidade){this.cidade = cidade; }
 
-    public String getCodPostal(){return codPostal; }
-    public void setCodPostal(String cidade){this.codPostal = codPostal; }
+    public boolean getActivo(){return activo; }
+    public void setActivo(boolean activo){this.activo = activo; }
 
     public int getCapacidade(){return capacidade; }
-    public void getCapacidade(int Capacidade){this.capacidade = Capacidade; }
+    public void setCapacidade(int Capacidade){this.capacidade = Capacidade; }
 
     public String getEstado(){return estado;}
-    public void getEstado(String Estado){this.estado = Estado;}
+    public void setEstado(String estado){this.estado = estado;}
 
     @Override
     public String toString(){
-        return "Alojamento "+nome+"\nId: "+id+"\ncidade: "+cidade+"\nEstado: "+estado;
+        return "Alojamento "+nome+"\nCódigo postal: "+codPostal+ "\nId: "+id+"\ncidade: "+cidade+"\nEstado: "+estado;
     }
 
 }
