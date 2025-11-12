@@ -66,4 +66,18 @@ public class CandidaturaRepository {
             return affectedRows > 0;
         }
     }
+    // Atualizar estado da candidatura
+
+    public boolean atualizarEstado(int id, EstadoCandidatura novoEstado) throws SQLException {
+        String SQL = "UPDATE candidatura SET estado=? WHERE id=?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+            conn.setAutoCommit(false);
+            stmt.setString(1, novoEstado.name());
+            stmt.setInt(2, id);
+            int rows = stmt.executeUpdate();
+            conn.commit();
+            return rows > 0;
+        }
+    }
 }
