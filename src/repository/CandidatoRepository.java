@@ -65,4 +65,17 @@ public class CandidatoRepository {
     }
 
     // M para encontrar candidatos através do email
+    public Optional<Candidato> findByEmail(String email) throws SQLException {
+        String SQL = "SELECT * FROM candidato WHERE email = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(mapResultSetToCandidato(rs));
+            }
+            return Optional.empty();
+        }
+    }
+
 }
