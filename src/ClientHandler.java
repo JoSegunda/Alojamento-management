@@ -171,6 +171,7 @@ public class ClientHandler implements Runnable {
     // HANDLERS DE COMANDOS
     // -------------------------------------------------------
 
+    // Sempre que há um novo usuário deve-se criar uma nova candidatura
     private String handleSubmeterCandidatura(int alojamentoId, int candidatoId)
             throws SQLException {
         Candidatura candidatura = candidaturaService.submeterCandidatura(alojamentoId, candidatoId);
@@ -186,7 +187,7 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Candidatura ID " + candidatura.getId()
                 + " está com estado: " + candidatura.getEstado();
     }
-
+    // Para usuário
     private String handleListarAlojamentosDisponiveis() throws SQLException {
         List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
@@ -223,7 +224,7 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Alojamento ID " + registado.getId()
                 + " registado como " + registado.getEstado();
     }
-
+    // Para o admin
     private String handleAtualizarEstadoAlojamento(String[] args) throws SQLException {
         if (args.length < 2)
             return "ERRO|Uso: ATUALIZAR_ESTADO_ALOJAMENTO|<id>|<estado>";
@@ -242,7 +243,7 @@ public class ClientHandler implements Runnable {
         else
             return "ERRO|Falha na atualização do alojamento.";
     }
-
+    // Para o admin
     private String handleAceitarCandidatura(int candidaturaId) throws SQLException {
         boolean sucesso = candidaturaService.aceitarCandidatura(candidaturaId);
         if (sucesso)
@@ -250,7 +251,7 @@ public class ClientHandler implements Runnable {
         else
             return "ERRO|Não foi possível aceitar a candidatura (verifique estado/capacidade).";
     }
-
+    // novo candidato
     private String handleRegistarCandidato() throws SQLException, IOException {
         String inputLine;
         out.print("Nome: ");
@@ -277,7 +278,14 @@ public class ClientHandler implements Runnable {
 
         Candidato novo = new Candidato(nome, email, telefone, sexo, curso);
         Candidato registado = candidatoService.registarCandidato(novo);
-        out.println();
+
+
+        System.out.println("=================================");
+        String s = handleListarAlojamentosDisponiveis();
+        System.out.println(s);
+        System.out.println("=================================");
+        System.out.println("Em que residência deseja ficar? ");
+
         return "SUCESSO|Candidato ID " + registado.getId() + " registado.";
     }
 
