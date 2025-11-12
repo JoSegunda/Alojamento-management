@@ -1,6 +1,7 @@
 import repository.AlojamentoRepository;
 import repository.CandidatoRepository;
 import repository.CandidaturaRepository;
+import repository.DatabaseConnection;
 import service.AlojamentoService;
 import service.CandidatoService;
 import service.CandidaturaService;
@@ -8,6 +9,7 @@ import service.CandidaturaService;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 
 public class Server {
     private static final int PORT = 12345;
@@ -26,6 +28,13 @@ public class Server {
                 candidaturaRepository, alojamentoRepository, candidatoRepository
         );
 
+        // Testar conexão a base de dados
+        try {
+            DatabaseConnection.getConnection();
+        } catch (SQLException e) {
+            System.err.println("ERRO FATAL: Falha na conexão com a base de dados. Encerrando o servidor.");
+            return; // Encerra o programa
+        }
 
         // Instancia o server socket na porta 12345
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
