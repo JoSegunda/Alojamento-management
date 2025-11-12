@@ -86,4 +86,23 @@ public class AlojamentoRepository {
         return lista;
     }
 
+    // Encontrar alojamento por estado
+    public List<Alojamento> findByEstado(EstadoAlojamento estado) throws SQLException {
+        List<Alojamento> lista = new ArrayList<>();
+        String SQL = "SELECT * FROM alojamento WHERE estado = ? ORDER BY id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+
+            stmt.setString(1, estado.name()); // Converte o enum para String
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapResultSetToAlojamento(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
 }

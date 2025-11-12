@@ -54,5 +54,7 @@ public class AlojamentoService {
         return alojamentoRepository.updateEstado(alojamentoId, novoEstado);
     }
     // Listar alojamentos por cidade
-
+    public List<Alojamento> listarAlojamentosPorEstado(EstadoAlojamento estado) throws SQLException {
+        return alojamentoRepository.findByEstado(estado);
+    }
 }
