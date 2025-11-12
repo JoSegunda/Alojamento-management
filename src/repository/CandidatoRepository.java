@@ -21,4 +21,5 @@ public class CandidatoRepository {
                 EstadoCandidato.valueOf(rs.getString("estado").toUpperCase())
         );
     }
+
 }
