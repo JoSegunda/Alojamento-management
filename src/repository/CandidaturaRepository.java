@@ -17,4 +17,7 @@ public class CandidaturaRepository {
         );
     }
     // Insere uma nova candidatura no PostgreSQL.
+    public Candidatura save(Candidatura candidatura) throws SQLException{
+        String SQL = "INSERT INTO candidaturas (alojamento_id, candidato_id, data_candidatura, estado) VALUES (?, ?, ?, ?) RETURNING id";
+    }
 }
