@@ -31,4 +31,6 @@ public class CandidatoService {
         }
         return candidatoRepository.save(candidato);
     }
+    // M para suspender candidato
+
 }
