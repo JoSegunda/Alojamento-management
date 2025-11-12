@@ -275,17 +275,23 @@ public class ClientHandler implements Runnable {
         String telefone = in.readLine();
         if (telefone == null) return "ERRO|Conexão fechada pelo cliente";
 
-        out.println("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
-        out.flush();
-        String sexoStr = in.readLine();
-        if (sexoStr == null) return "ERRO|Conexão fechada pelo cliente";
 
-        Candidato.Sexo sexo;
-        try {
-            sexo = Candidato.Sexo.valueOf(sexoStr.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
+
+        Candidato.Sexo sexo = null;
+        while (sexo == null){
+            out.println("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
+            out.flush();
+            String sexoStr = in.readLine();
+            if (sexoStr == null) return "ERRO|Conexão fechada pelo cliente";
+
+            try {
+                sexo = Candidato.Sexo.valueOf(sexoStr.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                out.println("ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.");
+                out.flush();
+            }
         }
+
         out.println("Curso: ");
         out.flush();
         String curso = in.readLine();
