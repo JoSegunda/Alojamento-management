@@ -48,21 +48,21 @@ public class ClientHandler implements Runnable {
                 // Processa o pedido e envia a resposta
                 String response = processCommand(inputLine);
                 out.println(response);
-                System.out.println("➡️ [CLIENTE " + clientPort + "] Resposta Enviada: " + response.split("\\|")[0]);
+                System.out.println("[CLIENTE " + clientPort + "] Resposta Enviada: " + response.split("\\|")[0]);
 
                 if ("SAIR".equalsIgnoreCase(inputLine)) {
                     break;
                 }
             }
         } catch (IOException e) {
-            System.err.println("⚠️ [HANDLER " + clientPort + "] Conexão encerrada pelo cliente.");
+            System.err.println("Conexão encerrada pelo cliente.");
         } finally {
             closeResources();
         }
     }
 
 
-    // --- Lógica de Parsing e Dispatch Atualizada ---
+    // Lógica de funcionamento
     private String processCommand(String command) {
         String[] parts = command.split("\\|");
         String cmd = parts[0].toUpperCase();
