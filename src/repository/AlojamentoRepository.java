@@ -21,7 +21,7 @@ public class AlojamentoRepository {
     }
     // Inserir um novo alojamento no PostgreSQL.
     public Alojamento save(Alojamento alojamento) throws SQLException{
-        String SQL = "INSERT INTO alojamentos (nome, cidade, capacidade, active, estado) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        String SQL = "INSERT INTO alojamento (nome, cidade, capacidade, active, estado) VALUES (?, ?, ?, ?, ?) RETURNING id";
 
         try(Connection conn = DatabaseConnection.getConnection();
         PreparedStatement pStatement = conn.prepareStatement(SQL)){
