@@ -41,12 +41,12 @@ public class CandidatoService {
 
         Candidato candidato = candidatoOpt.get();
 
-        // Lógica de suspensão: usar o método do modelo e atualizar no DB
+        // usar o method do modelo e atualizar na BD
         if (candidato.getEstado() != EstadoCandidato.SUSPENSO) {
-            candidato.suspender(); // Método do POJO
+            candidato.suspender();
             return candidatoRepository.updateEstado(candidatoId, EstadoCandidato.SUSPENSO);
         }
         return true; // Já estava suspenso
     }
 }
-}
+
