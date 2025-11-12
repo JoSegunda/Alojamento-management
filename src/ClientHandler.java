@@ -50,17 +50,26 @@ public class ClientHandler implements Runnable {
             out.flush();
 
             String inputLine;
+            int optionInput = 3;
             while ((inputLine = in.readLine()) != null) {
                 inputLine = inputLine.trim();
 
                 if (inputLine.isEmpty()) {
-                    System.out.println("Escolha pelo menos uma opção");
+                    out.println("Escolha pelo menos uma opção");
                     continue;
                 };
 
                 System.out.println("[CLIENTE " + clientPort + "] Comando recebido: " + inputLine);
 
-                String response = processCommand(inputLine);
+
+                try {
+                    optionInput = Integer.parseInt(inputLine);
+                } catch (NumberFormatException e) {
+                    System.out.println("This is not a valid option");
+                    System.out.println("Try again please");
+                }
+
+                String response = processCommand(optionInput);
 
                 // Envia a resposta e o menu novamente
                 out.println(response);
@@ -79,52 +88,21 @@ public class ClientHandler implements Runnable {
     }
 
     // PROCESSAMENTO DE COMANDOS
-    private String processCommand(String command) {
-        command = command.trim();
-        if (command.isEmpty()) return "ERRO|Comando vazio";
-
-        String[] parts = command.split("\\|", -1);
-        String cmd = parts[0].trim().toUpperCase();
-        String[] args = Arrays.copyOfRange(parts, 1, parts.length);
+    private String processCommand(int comando) {
 
         try {
             // --- COMANDOS NUMÉRICOS (usuário) ---
             try {
-                int cmdNum = Integer.parseInt(cmd);
-                switch (cmdNum) {
-                    case 1: // Submeter candidatura
-                        if (args.length < 2)
-                            return "ERRO|Uso: 1|<alojamentoId>|<candidatoId>";
-                        return handleSubmeterCandidatura(
-                                Integer.parseInt(args[0].trim()),
-                                Integer.parseInt(args[1].trim())
-                        );
-                    case 2: // Verificar estado candidatura
-                        if (args.length < 1)
-                            return "ERRO|Uso: 2|<candidaturaId>";
-                        return handleVerificarEstadoCandidatura(Integer.parseInt(args[0].trim()));
+                switch (comando) {
+
                     case 3: // Listar alojamentos disponíveis
                         return handleListarAlojamentosDisponiveis();
                     default:
-                        return "ERRO|Opção não reconhecida: " + cmdNum;
+                        return "ERRO|Opção não reconhecida: ";
                 }
             } catch (NumberFormatException e) {
                 // --- COMANDOS ADMINISTRATIVOS (texto) ---
-                switch (cmd) {
-                    case "REGISTAR_ALOJAMENTO":
-                        return handleRegistarAlojamento(args);
-                    case "ATUALIZAR_ESTADO_ALOJAMENTO":
-                        return handleAtualizarEstadoAlojamento(args);
-                    case "ACEITAR_CANDIDATURA":
-                        if (args.length < 1) return "ERRO|Uso: ACEITAR_CANDIDATURA|<id>";
-                        return handleAceitarCandidatura(Integer.parseInt(args[0].trim()));
-                    case "REGISTAR_CANDIDATO":
-                        return handleRegistarCandidato(args);
-                    case "SAIR":
-                        return "SUCESSO|Sessão encerrada.";
-                    default:
-                        return "ERRO|Comando não reconhecido: " + cmd;
-                }
+
             }
 
         } catch (IllegalArgumentException e) {
@@ -135,6 +113,8 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             System.err.println("Erro inesperado: " + e.getMessage());
             return "ERRO_SISTEMA|Ocorreu um erro interno.";
+        }finally {
+            return "Pedido Processado";
         }
     }
 
@@ -264,11 +244,11 @@ public class ClientHandler implements Runnable {
             "--------------------------------------------------\n" +
                     "| Bem-vindo ao Sistema de Gestão de Alojamentos! |\n" +
                     "--------------------------------------------------\n" +
-                    "Comandos disponíveis (Use: OPÇÃO|ARG1|ARG2...):\n" +
+                    "Comandos disponíveis:\n" +
                     "--------------------------------------------------\n" +
                     "USUÁRIO:\n" +
-                    "1 -> Candidatar a alojamento (1|alojId|candId)\n" +
-                    "2 -> Verificar estado da candidatura (2|candId)\n" +
-                    "3 -> Listar alojamentos disponíveis\n" +
+                    "Pressione [1] -> Candidatar a alojamento\n" +
+                    "Pressione [2] -> Verificar estado da candidatura\n" +
+                    "Pressione [3] -> Listar alojamentos disponíveis\n" +
                     "--------------------------------------------------\n";
 }
