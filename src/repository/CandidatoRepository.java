@@ -22,4 +22,8 @@ public class CandidatoRepository {
         );
     }
     //Insere um novo candidato no PostgreSQL.
+    public Candidato save(Candidato candidato) throws SQLException {
+        String SQL = "INSERT INTO candidatos (nome, email, telefone, sexo, curso, data_registo, estado) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
+
+    }
 }
