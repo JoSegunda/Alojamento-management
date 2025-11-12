@@ -38,10 +38,24 @@ public class Client {
                 if ("1".equals(userInput.trim())) {
                     System.out.println("🌀 Modo de registo ativado...");
 
+                    // 🔥 LIMPAR O BUFFER antes de começar o modo interativo
+                    clearInputStream(in);
+
                     // Processar fluxo interativo
                     while ((line = in.readLine()) != null) {
                         // Se for linha vazia, termina o fluxo
                         if (line.trim().isEmpty()) {
+                            break;
+                        }
+                        // Se for um ERRO, apenas mostrar
+                        if (line.startsWith("ERRO|")) {
+                            System.out.println("❌ " + line.substring(5));
+                            continue;
+                        }
+
+                        // Se for SUCESSO, mostrar e terminar
+                        if (line.startsWith("SUCESSO|")) {
+                            System.out.println("✅ " + line.substring(8));
                             break;
                         }
 
@@ -57,7 +71,7 @@ public class Client {
                         }
                     }
                 } else {
-                    // 🔹 Comportamento normal para outros comandos
+                    //Comportamento normal para outros comandos
                     while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
                         System.out.println("Servidor: " + line);
                     }
@@ -68,6 +82,18 @@ public class Client {
             System.err.println("Erro de comunicação: " + e.getMessage());
         } finally {
             System.out.println("Conexão encerrada.");
+        }
+    }
+
+    //  LIMPAR O BUFFER DE ENTRADA
+    private static void clearInputStream(BufferedReader in) {
+        try {
+            // Lê todos os dados disponíveis sem bloquear
+            while (in.ready()) {
+                in.readLine();
+            }
+        } catch (IOException e) {
+            // Ignora erros de limpeza
         }
     }
 }
