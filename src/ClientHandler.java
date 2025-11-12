@@ -120,7 +120,6 @@ public class ClientHandler implements Runnable {
                 default -> {
                     return "Erro| opção não reconhecida: " + command;
                 }
-
             }
         } catch (SQLException e) {
             return "Erro BD | "+ e.getMessage();
