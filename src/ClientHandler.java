@@ -97,8 +97,14 @@ public class ClientHandler implements Runnable {
         try{
             switch (command){
                 case 1 -> handleRegistarCandidato();
+
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        return "Registo concluído com sucesso.";
     }
 
     // PROCESSAMENTO DE COMANDOS
@@ -142,7 +148,7 @@ public class ClientHandler implements Runnable {
                         if (args.length < 1) return "ERRO|Uso: ACEITAR_CANDIDATURA|<id>";
                         return handleAceitarCandidatura(Integer.parseInt(args[0].trim()));
                     case "REGISTAR_CANDIDATO":
-                        return handleRegistarCandidato(args);
+                        return handleRegistarCandidato();
                     case "SAIR":
                         return "SUCESSO|Sessão encerrada.";
                     default:
@@ -198,6 +204,7 @@ public class ClientHandler implements Runnable {
         return sb.toString();
     }
 
+    // Para admin
     private String handleRegistarAlojamento(String[] args) throws SQLException {
         if (args.length < 3)
             return "ERRO|Uso: REGISTAR_ALOJAMENTO|<Nome>|<Cidade>|<Capacidade>";
@@ -244,7 +251,7 @@ public class ClientHandler implements Runnable {
             return "ERRO|Não foi possível aceitar a candidatura (verifique estado/capacidade).";
     }
 
-    private String handleRegistarCandidato(String[] args) throws SQLException, IOException {
+    private String handleRegistarCandidato() throws SQLException, IOException {
         String inputLine;
         out.print("Nome: ");
         inputLine = in.readLine();
@@ -270,12 +277,11 @@ public class ClientHandler implements Runnable {
 
         Candidato novo = new Candidato(nome, email, telefone, sexo, curso);
         Candidato registado = candidatoService.registarCandidato(novo);
+        out.println();
         return "SUCESSO|Candidato ID " + registado.getId() + " registado.";
     }
 
-    // -------------------------------------------------------
     // FECHAR CONEXÃO
-    // -------------------------------------------------------
     private void closeResources() {
         try {
             if (out != null) out.close();
