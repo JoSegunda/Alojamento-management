@@ -12,7 +12,7 @@ public class DatabaseConnection {
     private DatabaseConnection() { }
 
     /**
-     * Cria e devolve uma nova conexão ao PostgreSQL.
+     * Cria e devolve uma nova conexão ao Postgres.
      * @return uma conexão JDBC ativa.
      * @throws SQLException se ocorrer erro de ligação.
      */
@@ -22,14 +22,14 @@ public class DatabaseConnection {
             Class.forName("org.postgresql.Driver");
 
             Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexão estabelecida com sucesso ao PostgreSQL.");
+            System.out.println("Conexão estabelecida com sucesso ao Postgres.");
             return conn;
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Driver PostgreSQL não encontrado: " + e.getMessage());
+            System.err.println("Driver Postgres não encontrado: " + e.getMessage());
             throw new SQLException("Driver não encontrado", e);
         } catch (SQLException e) {
-            System.err.println("Falha ao conectar ao PostgreSQL: " + e.getMessage());
+            System.err.println("Falha ao conectar ao Postgres: " + e.getMessage());
             throw e;
         }
     }
