@@ -48,4 +48,7 @@ public class CandidatoRepository {
     }
 
     //Busca um candidato pelo seu ID
+    public Optional<Candidato> findById(int id) throws SQLException {
+        String SQL = "SELECT * FROM candidatos WHERE id = ?";
+    }
 }
