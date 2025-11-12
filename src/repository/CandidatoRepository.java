@@ -23,10 +23,6 @@ public class CandidatoRepository {
     }
     //Insere um novo candidato no PostgreSQL.
     public Candidato save(Candidato candidato) throws SQLException {
-        // Verificar se candidato já está na base de dados
-        if (findByEmail(candidato.getEmail()).isPresent()) {
-            throw new SQLException("Já existe um candidato com este email.");
-        }
 
         String SQL = "INSERT INTO candidato (nome, email, telefone, sexo, curso, data_registo, estado) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
 

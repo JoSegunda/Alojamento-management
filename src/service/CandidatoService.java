@@ -19,7 +19,7 @@ public class CandidatoService {
 
     public Candidato registarCandidato(Candidato candidato, int alojamentoId) throws IllegalArgumentException, SQLException {
         // Verificar
-        Candidato novo = candidatoRepository.save(candidato);
+
         if (candidato == null) {
             throw new IllegalArgumentException("O objeto Candidato não pode ser nulo.");
         }
@@ -33,9 +33,12 @@ public class CandidatoService {
         if (candidatoRepository.findByEmail(candidato.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Já existe um candidato registado com este email.");
         }
+        Candidato novo = candidatoRepository.save(candidato);
+        //Criar candidatura
         Candidatura candidatura = new Candidatura(alojamentoId, novo.getId());
         candidaturaService.submeterCandidatura(alojamentoId, novo.getId());
-        return candidatoRepository.save(candidato);
+
+        return novo;
     }
     // M para suspender candidato
     public boolean suspenderCandidato(int candidatoId) throws SQLException {
