@@ -59,6 +59,7 @@ public class AlojamentoRepository {
             return affectedRows > 0;
         }
     }
+    // M que nos permite encontrar candidato pelo id
     public Alojamento findById(int id) throws SQLException {
         String SQL = "SELECT * FROM alojamento WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -71,7 +72,7 @@ public class AlojamentoRepository {
             return null;
         }
     }
-
+    // M que nos permite encontrar todos candidatos
     public List<Alojamento> findAll() throws SQLException {
         List<Alojamento> lista = new ArrayList<>();
         String SQL = "SELECT * FROM alojamento ORDER BY id";

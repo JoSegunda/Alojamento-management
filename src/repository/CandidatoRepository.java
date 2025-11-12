@@ -23,33 +23,33 @@ public class CandidatoRepository {
     }
     //Insere um novo candidato no PostgreSQL.
     public Candidato save(Candidato candidato) throws SQLException {
-        String SQL = "INSERT INTO candidatos (nome, email, telefone, sexo, curso, data_registo, estado) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
+        String SQL = "INSERT INTO candidato (nome, email, telefone, sexo, curso, data_registo, estado) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
 
-            // ... Mapeamento dos campos do candidato para pstmt ...
-            pstmt.setString(1, candidato.getNome());
-            pstmt.setString(2, candidato.getEmail());
-            pstmt.setString(3, candidato.getTelefone());
-            pstmt.setString(4, candidato.getSexo().name());
-            pstmt.setString(5, candidato.getCurso());
-            pstmt.setDate(6, Date.valueOf(candidato.getDataRegisto())); // Converte LocalDate para SQL Date
-            pstmt.setString(7, candidato.getEstado().name());
+            // Mapeamento dos campos do candidato para pStatement
+            pStatement.setString(1, candidato.getNome());
+            pStatement.setString(2, candidato.getEmail());
+            pStatement.setString(3, candidato.getTelefone());
+            pStatement.setString(4, candidato.getSexo().name());
+            pStatement.setString(5, candidato.getCurso());
+            pStatement.setDate(6, Date.valueOf(candidato.getDataRegisto())); // Converte LocalDate para SQL Date
+            pStatement.setString(7, candidato.getEstado().name());
 
-            ResultSet rs = pstmt.executeQuery();
+            ResultSet rs = pStatement.executeQuery();
             if (rs.next()) {
                 candidato.setId(rs.getInt("id"));
                 System.out.printf("Candidato salvo. ID: %d%n", candidato.getId());
                 return candidato;
             }
-            throw new SQLException("Falha ao obter o ID do candidato após a inserção.");
+            throw new SQLException("Falha ao obter o ID do candidato.");
         }
     }
 
-    //Busca um candidato pelo seu ID
+    //Busca um candidato pelo seu id
     public Optional<Candidato> findById(int id) throws SQLException {
-        String SQL = "SELECT * FROM candidatos WHERE id = ?";
+        String SQL = "SELECT * FROM candidato WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pStatement = conn.prepareStatement(SQL)) {
