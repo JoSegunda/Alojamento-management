@@ -47,7 +47,7 @@ public class AlojamentoRepository {
 
     // Atualizar o estado de um alojamento
     public boolean updateEstado(int id, EstadoAlojamento novoEstado) throws SQLException{
-        String SQL = "UPDATE alojamentos SET estado = ? WHERE id = ?";
+        String SQL = "UPDATE alojamento SET estado = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pStatement = conn.prepareStatement(SQL)) {
