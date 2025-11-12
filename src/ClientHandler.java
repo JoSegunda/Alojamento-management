@@ -137,10 +137,10 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|ESTADO_CANDIDATURA|" + candidatura.getId() + "|" + candidatura.getEstado().name();
     }
 
-    // COMANDO 3: Verificar alojamento disponíveis + capacidade
+    // COMANDO 3: Verificar alojamento disponível + capacidade
     private String handleListarAlojamentosDisponiveis() throws IllegalArgumentException, SQLException {
         // Assume que este método busca alojamentos APROVADOS e ATIVOS.
-        List<Alojamento> disponiveis = alojamentoService.listarAlojamentosDisponiveis();
+        List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
         if (disponiveis.isEmpty()) {
             return "SUCESSO|Nenhum alojamento disponível no momento.";
@@ -155,13 +155,21 @@ public class ClientHandler implements Runnable {
                     .append(" em ").append(a.getCidade())
                     .append(" | Capacidade: ").append(a.getCapacidade()).append("\n");
         }
-
         return sb.toString();
     }
 
     // --- (Restante dos métodos handlers, como handleRegistarAlojamento, ficam inalterados) ---
 
     private void closeResources() {
-        // ... (método closeResources inalterado) ...
+        try {
+            if (out != null) out.close();
+            if (in != null) in.close();
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                clientSocket.close();
+                System.out.println("[HANDLER " + clientPort + "] Conexão com o cliente encerrada.");
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao fechar recursos: " + e.getMessage());
+        }
     }
 }

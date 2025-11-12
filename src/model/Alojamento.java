@@ -6,7 +6,7 @@ public class Alojamento {
     private String cidade;
     private boolean active;
     private int capacidade;
-    public enum EstadoAlojamento{ PENDENTE, APROVADO, RECUSADO, INCOMPLETO };
+    public enum EstadoAlojamento{ ATIVO, EM_OBRAS, FECHADO };
     private EstadoAlojamento estado;
 
     public Alojamento(String nome, String cidade, int capacidade){
@@ -14,7 +14,7 @@ public class Alojamento {
         this.cidade = cidade;
         this.capacidade  = capacidade;
         this.active = true;
-        this.estado = EstadoAlojamento.PENDENTE; // estado inicial
+        this.estado = EstadoAlojamento.ATIVO; // estado inicial
     }
 
     // Construtor ao ler a base de dados

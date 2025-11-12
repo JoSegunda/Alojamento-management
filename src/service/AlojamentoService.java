@@ -40,8 +40,8 @@ public class AlojamentoService {
             throw new IllegalArgumentException("Alojamento com ID " + alojamentoId + " não encontrado.");
         }
         // Transição de estado
-        // Não se pode aprovar um alojamento que está incompleto sem correções
-        if (alojamento.getEstado() == EstadoAlojamento.INCOMPLETO && novoEstado == EstadoAlojamento.APROVADO) {
+        // Não se pode aprovar um alojamento que está em obras sem correções
+        if (alojamento.getEstado() == EstadoAlojamento.EM_OBRAS && novoEstado == EstadoAlojamento.ATIVO) {
             throw new IllegalArgumentException("Não é possível aprovar um alojamento INCOMPLETO diretamente.");
         }
         // Se o estado for o mesmo, não faz nada
@@ -51,7 +51,7 @@ public class AlojamentoService {
 
         return alojamentoRepository.updateEstado(alojamentoId, novoEstado);
     }
-    // Listar alojamentos por cidade
+    // Listar alojamentos por estado
     public List<Alojamento> listarAlojamentosPorEstado(EstadoAlojamento estado) throws SQLException {
         return alojamentoRepository.findByEstado(estado);
     }
