@@ -32,5 +32,21 @@ public class CandidatoService {
         return candidatoRepository.save(candidato);
     }
     // M para suspender candidato
+    public boolean suspenderCandidato(int candidatoId) throws SQLException {
+        Optional<Candidato> candidatoOpt = candidatoRepository.findById(candidatoId);
 
+        if (candidatoOpt.isEmpty()) {
+            throw new IllegalArgumentException("Candidato com ID " + candidatoId + " não encontrado.");
+        }
+
+        Candidato candidato = candidatoOpt.get();
+
+        // Lógica de suspensão: usar o método do modelo e atualizar no DB
+        if (candidato.getEstado() != EstadoCandidato.SUSPENSO) {
+            candidato.suspender(); // Método do POJO
+            return candidatoRepository.updateEstado(candidatoId, EstadoCandidato.SUSPENSO);
+        }
+        return true; // Já estava suspenso
+    }
+}
 }
