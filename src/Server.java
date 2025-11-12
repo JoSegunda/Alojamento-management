@@ -43,10 +43,15 @@ public class Server {
             while(true){
                 // Accept() bloqueia a execução até que o servidor receba um pedido de conexão
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Novo cliente conectado: " + clientSocket.getInetAddress().getHostAddress() + " na porta " + clientSocket.getPort());
+                System.out.println("Novo cliente conectado");
 
                 // Criar um clientHandler para processar o cliente
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                ClientHandler clientHandler = new ClientHandler(
+                        clientSocket,
+                        alojamentoService,
+                        candidatoService,
+                        candidaturaService
+                );
 
                 //Inicia o handler numa nova Thread
                 Thread thread = new Thread(clientHandler);
@@ -54,6 +59,8 @@ public class Server {
             }
         } catch (IOException e) {
             System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
+        }finally {
+            DatabaseConnection.closeConnection();
         }
     }
 }
