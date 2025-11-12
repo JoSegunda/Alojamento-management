@@ -46,4 +46,6 @@ public class CandidatoRepository {
             throw new SQLException("Falha ao obter o ID do candidato após a inserção.");
         }
     }
+
+    //Busca um candidato pelo seu ID
 }
