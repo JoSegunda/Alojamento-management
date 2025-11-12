@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("ALL")
 public class ClientHandler implements Runnable {
@@ -117,7 +118,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // PROCESSAMENTO DE COMANDOS
+    // PROCESSAMENTO DE COMANDOS (Reservado para admin)
     private String processCommand(String command) {
         command = command.trim();
         if (command.isEmpty()) return "ERRO|Comando vazio";
@@ -141,7 +142,7 @@ public class ClientHandler implements Runnable {
                     case 2: // Verificar estado candidatura
                         if (args.length < 1)
                             return "ERRO|Uso: 2|<candidaturaId>";
-                        return handleVerificarEstadoCandidatura(Integer.parseInt(args[0].trim()));
+                        return handleVerificarEstadoCandidatura();
                     case 3: // Listar alojamentos disponíveis
                         return handleListarAlojamentosDisponiveis();
                     default:
@@ -177,8 +178,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // HANDLERS DE COMANDOS
-
     // Sempre que há um novo usuário deve-se criar uma nova candidatura
     private String handleSubmeterCandidatura(int alojamentoId, int candidatoId)
             throws SQLException {
@@ -186,15 +185,76 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Candidatura ID " + candidatura.getId()
                 + " submetida. Estado: " + candidatura.getEstado();
     }
-    // Para usuário
-    private String handleVerificarEstadoCandidatura(int candidaturaId) throws SQLException {
-        List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
-        if (candidaturaOpt.isEmpty())
-            return "ERRO|Candidatura ID " + candidaturaId + " não encontrada.";
-        Candidatura candidatura = candidaturaOpt.getFirst();
-        return "SUCESSO|Candidatura ID " + candidatura.getId()
-                + " está com estado: " + candidatura.getEstado();
+    // Para usuário - verificar estado da candidatura
+    private String handleVerificarEstadoCandidatura() throws SQLException, IOException {
+        try {
+            out.println("Digite o ID da candidatura:");
+            out.flush();
+            String candidaturaInput = in.readLine();
+            if (candidaturaInput == null) return "ERRO|Conexão fechada pelo cliente";
+
+            int candidaturaId;
+            try {
+                candidaturaId = Integer.parseInt(candidaturaInput.trim());
+            } catch (NumberFormatException e) {
+                return "ERRO|ID de candidatura inválido.";
+            }
+
+            List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
+
+            if (candidaturaOpt.isEmpty()) {
+                return "ERRO|Candidatura com ID " + candidaturaId + " não encontrada.";
+            }
+
+            Candidatura candidatura = candidaturaOpt.getFirst();
+
+            String resultado = "SUCESSO|DADOS_CANDIDATURA|\n" +
+                    "ID: " + candidatura.getId() + "\n" +
+                    "Data: " + candidatura.getDataCandidatura() + "\n" +
+                    "Estado: " + candidatura.getEstado();
+
+            // Tentar obter informações do candidato
+            try {
+                Optional<Candidato> candidatoOpt = candidatoService.findById(candidatura.getCandidatoId());
+                if (candidatoOpt.isPresent()) {
+                    Candidato candidato = candidatoOpt.get();
+                    resultado += "\nCandidato: " + candidato.getNome() + " (ID: " + candidato.getId() + ")";
+                    resultado += "\nEmail: " + candidato.getEmail();
+                    resultado += "\nCurso: " + candidato.getCurso();
+                } else {
+                    resultado += "\nCandidato: Informação não disponível (ID: " + candidatura.getCandidatoId() + ")";
+                }
+            } catch (SQLException e) {
+                resultado += "\nCandidato: Erro ao carregar informações";
+            }
+
+            // Tentar obter informações do alojamento
+            try {
+                Optional<Alojamento> alojamentoOpt = alojamentoService.findById(candidatura.getAlojamentoId());
+                if (alojamentoOpt.isPresent()) {
+                    Alojamento alojamento = alojamentoOpt.get();
+                    resultado += "\nAlojamento: " + alojamento.getNome() + " - " + alojamento.getCidade() +
+                            " (ID: " + alojamento.getId() + ")";
+                    resultado += "\nCapacidade: " + alojamento.getCapacidade();
+                    resultado += "\nEstado Alojamento: " + alojamento.getEstado();
+                } else {
+                    resultado += "\nAlojamento: Informação não disponível (ID: " + candidatura.getAlojamentoId() + ")";
+                }
+            } catch (SQLException e) {
+                resultado += "\nAlojamento: Erro ao carregar informações";
+            }
+
+            // ⚠️ IMPORTANTE: Enviar linha vazia no final
+            out.println();
+            return resultado;
+
+        } catch (Exception e) {
+            System.err.println("[ERRO] Em handleVerificarEstadoCandidatura: " + e.getMessage());
+            out.println();
+            return "ERRO|Falha ao verificar candidatura: " + e.getMessage();
+        }
     }
+
     // Para usuário
     private String handleListarAlojamentosDisponiveis() throws SQLException {
         List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);

@@ -5,6 +5,7 @@ import model.Alojamento.EstadoAlojamento;
 import repository.AlojamentoRepository;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class AlojamentoService {
 
@@ -54,5 +55,10 @@ public class AlojamentoService {
     // Listar alojamentos por estado
     public List<Alojamento> listarAlojamentosPorEstado(EstadoAlojamento estado) throws SQLException {
         return alojamentoRepository.findByEstado(estado);
+    }
+
+    public Optional<Alojamento> findById(int id) throws SQLException {
+        Alojamento alojamento = alojamentoRepository.findById(id);
+        return Optional.ofNullable(alojamento);
     }
 }

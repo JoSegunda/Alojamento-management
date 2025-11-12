@@ -57,5 +57,9 @@ public class CandidatoService {
         }
         return true; // Já estava suspenso
     }
+
+    public Optional<Candidato> findById(int id) throws SQLException {
+        return candidatoRepository.findById(id);
+    }
 }
 
