@@ -7,4 +7,10 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class CandidatoService {
+
+    private final CandidatoRepository candidatoRepository;
+
+    public CandidatoService(CandidatoRepository candidatoRepository) {
+        this.candidatoRepository = candidatoRepository;
+    }
 }
