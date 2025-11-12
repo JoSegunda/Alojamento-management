@@ -66,27 +66,20 @@ public class ClientHandler implements Runnable {
             while ((inputLine = in.readLine()) != null) {
                 inputLine = inputLine.trim();
 
-                if (inputLine.isEmpty()) {
-                    out.println("Escolha pelo menos uma opção");
-                    continue;
-                };
-
                 System.out.println("[CLIENTE " + clientPort + "] Comando recebido: " + inputLine);
-
 
                 try {
                     optionInput = Integer.parseInt(inputLine);
+                    String response = processUserCommand(optionInput);
+
+                    out.println(response);
+                    out.println(); // linha em branco
                 } catch (NumberFormatException e) {
                     System.out.println("This is not a valid option");
                     System.out.println("Try again please");
                 }
 
-                String response = processCommand(inputLine);
-
-                // Envia a resposta e o menu novamente
-                out.println(response);
-                out.println(); // linha em branco
-
+                //String response = processCommand(inputLine);
 
                 System.out.println("[CLIENTE " + clientPort + "] Resposta enviada.");
                 if (inputLine.equalsIgnoreCase("SAIR")) break;
@@ -96,6 +89,15 @@ public class ClientHandler implements Runnable {
             System.err.println("Conexão encerrada com o cliente " + clientPort);
         } finally {
             closeResources();
+        }
+    }
+
+    private String processUserCommand(int command){
+
+        try{
+            switch (command){
+                case 1 -> handleRegistarCandidato();
+            }
         }
     }
 
@@ -242,20 +244,29 @@ public class ClientHandler implements Runnable {
             return "ERRO|Não foi possível aceitar a candidatura (verifique estado/capacidade).";
     }
 
-    private String handleRegistarCandidato(String[] args) throws SQLException {
-        if (args.length < 5)
-            return "ERRO|Uso: REGISTAR_CANDIDATO|<Nome>|<Email>|<Telefone>|<Sexo>|<Curso>";
+    private String handleRegistarCandidato(String[] args) throws SQLException, IOException {
+        String inputLine;
+        out.print("Nome: ");
+        inputLine = in.readLine();
+        String nome = inputLine.trim();
+        out.print("Email: ");
+        inputLine = in.readLine();
+        String email = inputLine.trim();
+        out.print("Telefone: ");
+        inputLine = in.readLine();
+        String telefone = inputLine.trim().toUpperCase();
+        out.print("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
 
-        String nome = args[0].trim();
-        String email = args[1].trim();
-        String telefone = args[2].trim();
         Sexo sexo;
         try {
-            sexo = Sexo.valueOf(args[3].trim().toUpperCase());
+            inputLine = in.readLine();
+            sexo = Sexo.valueOf(inputLine.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
         }
-        String curso = args[4].trim();
+        System.out.print("Curso: ");
+        inputLine = in.readLine();
+        String curso = inputLine.trim();
 
         Candidato novo = new Candidato(nome, email, telefone, sexo, curso);
         Candidato registado = candidatoService.registarCandidato(novo);
