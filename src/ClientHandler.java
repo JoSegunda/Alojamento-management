@@ -93,24 +93,26 @@ public class ClientHandler implements Runnable {
     }
 
     private String processUserCommand(int command){
-
         try{
             switch (command){
                 case 1 -> {
-                    return handleRegistarCandidato();
+                    String result = handleRegistarCandidato();
+                    // Já foi enviada a linha vazia no handleRegistarCandidato()
+                    return result;
                 }
                 case 3 -> {
                     return handleListarAlojamentosDisponiveis();
                 }
                 default -> {
-                    return "Erro| opção não reconhecida: " + command;
+                    return "ERRO|Opção não reconhecida: " + command;
                 }
-
             }
         } catch (SQLException e) {
-            return "Erro BD | "+ e.getMessage();
+            out.println(); // Enviar linha vazia em caso de erro
+            return "ERRO_BD|" + e.getMessage();
         } catch (IOException e) {
-            return "Erro BD | "+ e.getMessage();
+            out.println(); // Enviar linha vazia em caso de erro
+            return "ERRO_IO|" + e.getMessage();
         }
     }
 
@@ -174,9 +176,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // -------------------------------------------------------
     // HANDLERS DE COMANDOS
-    // -------------------------------------------------------
 
     // Sempre que há um novo usuário deve-se criar uma nova candidatura
     private String handleSubmeterCandidatura(int alojamentoId, int candidatoId)
