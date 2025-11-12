@@ -23,5 +23,40 @@ public class AlojamentoRepository {
     public Alojamento save(Alojamento alojamento) throws SQLException{
         String SQL = "INSERT INTO alojamentos (nome, cidade, capacidade, active, estado) VALUES (?, ?, ?, ?, ?) RETURNING id";
 
+        try(Connection conn = DatabaseConnection.getConnection();
+        PreparedStatement pStatement = conn.prepareStatement(SQL)){
+
+            pStatement.setString(1, alojamento.getNome());
+            pStatement.setString(2, alojamento.getCidade());
+            pStatement.setInt(3, alojamento.getCapacidade());
+            pStatement.setBoolean(4, alojamento.isActive());
+            // Converter o enum para String
+            pStatement.setString(5, alojamento.getEstado().name());
+
+            ResultSet rs = pStatement.executeQuery();
+
+            if (rs.next()){
+                // Define o ID gerado pela BD no objeto java
+                alojamento.setId(rs.getInt("id"));
+                System.out.printf("Alojamento salvo, ID: %d%n", alojamento.getId());
+                return alojamento;
+            }
+            throw new SQLException("Falha ao obter o ID Depois da inserção");
+        }// O try-with-resources garante que conn e pStatement são fechados
+    }
+
+    // Atualizar o estado de um alojamento
+    public boolean updateEstado(int id, EstadoAlojamento novoEstado) throws SQLException{
+        String SQL = "UPDATE alojamentos SET estado = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
+
+            pStatement.setString(1, novoEstado.name());
+            pStatement.setInt(2, id);
+
+            int affectedRows = pStatement.executeUpdate();
+            return affectedRows > 0;
+        }
     }
 }
