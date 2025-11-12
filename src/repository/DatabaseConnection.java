@@ -22,7 +22,7 @@ public class DatabaseConnection {
             Class.forName("org.postgresql.Driver");
 
             Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexão estabelecida com sucesso ao Postgres.");
+            System.out.println("Conexão estabelecida.");
             return conn;
 
         } catch (ClassNotFoundException e) {
