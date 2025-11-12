@@ -83,4 +83,26 @@ public class CandidatoRepository {
         }
     }
 
+    // Atualizar o estado de um candidato
+    public boolean updateEstado(int id, EstadoCandidato novoEstado) throws SQLException {
+        String SQL = "UPDATE candidato SET estado = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
+
+            pStatement.setString(1, novoEstado.name());
+            pStatement.setInt(2, id);
+
+            int affectedRows = pStatement.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.printf("Estado do candidato ID %d atualizado para: %s%n", id, novoEstado);
+                return true;
+            } else {
+                System.out.printf("Candidato com ID %d não encontrado.%n", id);
+                return false;
+            }
+        }
+    }
+
 }
