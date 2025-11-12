@@ -42,6 +42,7 @@ public class ClientHandler implements Runnable {
         System.out.println("Handler iniciado...");
 
         try {
+            out.print(MENU);
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("[CLIENTE " + clientPort + "] Comando Recebido: " + inputLine);
