@@ -321,6 +321,7 @@ public class ClientHandler implements Runnable {
         Candidato novoCandidato = new Candidato(nome, email, telefone, sexo, curso);
         Candidato registado = candidatoService.registarCandidato(novoCandidato, alojamentoId);
 
+        out.println();
         return "SUCESSO|Candidato " + registado.getNome() +
                 " (ID: " + registado.getId() + ") registado e candidatura submetida ao alojamento " + alojamentoId + ".";
     }
