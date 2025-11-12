@@ -87,4 +87,22 @@ public class CandidaturaRepository {
         return lista;
     }
 
+    // Verificar se já existe uma candidatura para o mesmo alojamento e candidato
+    public Optional<Candidatura> findByAlojamentoAndCandidato(int alojamentoId, int candidatoId) throws SQLException {
+        String SQL = "SELECT * FROM candidatura WHERE alojamento_id = ? AND candidato_id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+
+            stmt.setInt(1, alojamentoId);
+            stmt.setInt(2, candidatoId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return Optional.of(mapResultSetToCandidatura(rs));
+            }
+            return Optional.empty();
+        }
+    }
 }
