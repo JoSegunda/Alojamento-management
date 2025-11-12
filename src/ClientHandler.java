@@ -168,6 +168,13 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Alojamento ID " + registado.getId() + " registado como " + registado.getEstado();
     }
 
+    private String handleAtualizarEstadoAlojamento(int alojamentoId, EstadoAlojamento estado) throws IllegalArgumentException, SQLException {
+        boolean sucesso = alojamentoService.atualizarEstado(alojamentoId, estado);
+        if (sucesso) {
+            return "SUCESSO|Alojamento " + alojamentoId + " atualizado para " + estado.name() + ".";
+        }
+        return "ERRO|Falha na atualização do estado do alojamento.";
+    }
 
     private void closeResources() {
         try {
