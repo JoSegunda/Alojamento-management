@@ -99,6 +99,9 @@ public class ClientHandler implements Runnable {
                 case 1 -> {
                     return handleRegistarCandidato();
                 }
+                case 2 -> {
+                    return handleVerificarEstadoCandidatura();
+                }
                 case 3 -> {
                     return handleListarAlojamentosDisponiveis();
                 }
@@ -304,7 +307,7 @@ public class ClientHandler implements Runnable {
         out.flush();
         out.println("=================================");
         out.flush();
-        out.println("Em que residência deseja ficar? ");
+        out.println("Em que residência deseja ficar?: ");
         out.flush();
 
         out.println("Digite o ID do alojamento pretendido: ");
