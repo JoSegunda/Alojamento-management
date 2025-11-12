@@ -50,5 +50,17 @@ public class CandidatoRepository {
     //Busca um candidato pelo seu ID
     public Optional<Candidato> findById(int id) throws SQLException {
         String SQL = "SELECT * FROM candidatos WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
+
+            pStatement.setInt(1, id);
+            ResultSet rs = pStatement.executeQuery();
+
+            if (rs.next()) {
+                return Optional.of(mapResultSetToCandidato(rs));
+            }
+            return Optional.empty(); // Retorna vazio se não for encontrado
+        }
     }
 }
