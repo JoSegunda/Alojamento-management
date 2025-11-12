@@ -43,12 +43,12 @@ public class CandidaturaRepository {
         String SQL = "UPDATE candidaturas SET estado = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
 
-            pstmt.setString(1, novoEstado.name());
-            pstmt.setInt(2, id);
+            pStatement.setString(1, novoEstado.name());
+            pStatement.setInt(2, id);
 
-            int affectedRows = pstmt.executeUpdate();
+            int affectedRows = pStatement.executeUpdate();
             return affectedRows > 0;
         }
     }
