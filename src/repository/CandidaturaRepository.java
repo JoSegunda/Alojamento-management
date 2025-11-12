@@ -38,4 +38,5 @@ public class CandidaturaRepository {
             throw new SQLException("Falha ao obter o ID da candidatura após a inserção.");
         }
     }
+    //Atualiza o estado da candidatura
 }
