@@ -193,7 +193,6 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Candidato ID " + registado.getId() + " registado.";
     }
 
-
     private void closeResources() {
         try {
             if (out != null) out.close();
