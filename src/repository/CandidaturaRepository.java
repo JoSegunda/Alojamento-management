@@ -19,5 +19,23 @@ public class CandidaturaRepository {
     // Insere uma nova candidatura no PostgreSQL.
     public Candidatura save(Candidatura candidatura) throws SQLException{
         String SQL = "INSERT INTO candidaturas (alojamento_id, candidato_id, data_candidatura, estado) VALUES (?, ?, ?, ?) RETURNING id";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            pstmt.setInt(1, candidatura.getAlojamentoId());
+            pstmt.setInt(2, candidatura.getCandidatoId());
+            pstmt.setDate(3, Date.valueOf(candidatura.getDataCandidatura()));
+            pstmt.setString(4, candidatura.getEstado().name());
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                candidatura.setId(rs.getInt("id"));
+                System.out.printf("Candidatura salva. ID: %d%n", candidatura.getId());
+                return candidatura;
+            }
+            throw new SQLException("Falha ao obter o ID da candidatura após a inserção.");
+        }
     }
 }
