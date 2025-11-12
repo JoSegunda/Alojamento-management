@@ -80,8 +80,6 @@ public class ClientHandler implements Runnable {
 
                     optionInput = Integer.parseInt(inputLine);
 
-
-
                     String response = processUserCommand(optionInput);
 
                     out.println(response);
