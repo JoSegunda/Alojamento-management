@@ -15,4 +15,13 @@ public class CandidaturaService {
     private final CandidaturaRepository candidaturaRepository;
     private final AlojamentoRepository alojamentoRepository;
     private final CandidatoRepository candidatoRepository;
+
+    // Depende de três repositórios
+    public CandidaturaService(CandidaturaRepository candidaturaRepository,
+                              AlojamentoRepository alojamentoRepository,
+                              CandidatoRepository candidatoRepository) {
+        this.candidaturaRepository = candidaturaRepository;
+        this.alojamentoRepository = alojamentoRepository;
+        this.candidatoRepository = candidatoRepository;
+    }
 }
