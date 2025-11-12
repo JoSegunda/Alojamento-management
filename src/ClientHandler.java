@@ -260,31 +260,38 @@ public class ClientHandler implements Runnable {
     }
     // novo candidato
     private String handleRegistarCandidato() throws SQLException, IOException {
-        String inputLine;
+
         out.println("Nome: ");
         out.flush();
         String nome = in.readLine();
+        if (nome == null) return "ERRO|Conexão fechada pelo cliente";
+
 
         out.println("Email: ");
         out.flush();
         String email = in.readLine();
+        if (email == null) return "ERRO|Conexão fechada pelo cliente";
 
         out.println("Telefone: ");
         out.flush();
         String telefone = in.readLine();
+        if (telefone == null) return "ERRO|Conexão fechada pelo cliente";
 
         out.println("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
         out.flush();
         String sexoStr = in.readLine();
+        if (sexoStr == null) return "ERRO|Conexão fechada pelo cliente";
+
         Candidato.Sexo sexo;
         try {
-            sexo = Candidato.Sexo.valueOf(sexoStr.toUpperCase());
+            sexo = Candidato.Sexo.valueOf(sexoStr.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
         }
         out.println("Curso: ");
         out.flush();
         String curso = in.readLine();
+        if (curso == null) return "ERRO|Conexão fechada pelo cliente";
 
         out.println("=================================");
         out.flush();
@@ -299,7 +306,9 @@ public class ClientHandler implements Runnable {
         out.println("Digite o ID do alojamento pretendido: ");
         out.flush();
         String alojamentoInput = in.readLine();
+
         int alojamentoId;
+        if (alojamentoInput == null) return "ERRO|Conexão fechada pelo cliente";
 
         try {
             alojamentoId = Integer.parseInt(alojamentoInput);
