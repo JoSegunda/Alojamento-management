@@ -19,4 +19,9 @@ public class AlojamentoRepository {
                 EstadoAlojamento.valueOf(rs.getString("estado").toUpperCase())
         );
     }
+    // Inserir um novo alojamento no PostgreSQL.
+    public Alojamento save(Alojamento alojamento) throws SQLException{
+        String SQL = "INSERT INTO alojamentos (nome, cidade, capacidade, active, estado) VALUES (?, ?, ?, ?, ?) RETURNING id";
+
+    }
 }
