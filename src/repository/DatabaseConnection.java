@@ -26,10 +26,10 @@ public class DatabaseConnection {
             return conn;
 
         } catch (ClassNotFoundException e) {
-            System.err.println("Driver Postgres não encontrado: " + e.getMessage());
+            System.err.printf("Driver Postgres não encontrado: %s%n", e.getMessage());
             throw new SQLException("Driver não encontrado", e);
         } catch (SQLException e) {
-            System.err.println("Falha ao conectar ao Postgres: " + e.getMessage());
+            System.err.printf("Falha ao conectar ao Postgres: %s%n", e.getMessage());
             throw e;
         }
     }
@@ -41,7 +41,7 @@ public class DatabaseConnection {
                 conn.close();
                 System.out.println("Conexão encerrada com sucesso.");
             } catch (SQLException e) {
-                System.err.println("Erro ao fechar conexão: " + e.getMessage());
+                System.err.printf("Erro ao fechar conexão: %s%n", e.getMessage());
             }
         }
     }
