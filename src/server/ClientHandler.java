@@ -42,6 +42,23 @@ public class ClientHandler implements Runnable {
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
 
+    private static final String MENU_ADMIN =
+            "--------------------------------------------------\n" +
+                    "|         PAINEL ADMINISTRATIVO                 |\n" +
+                    "--------------------------------------------------\n" +
+                    "Comandos disponíveis:\n" +
+                    "--------------------------------------------------\n" +
+                    "REGISTAR_ALOJAMENTO|<Nome>|<Cidade>|<Capacidade>\n" +
+                    "ATUALIZAR_ESTADO_ALOJAMENTO|<ID>|<NOVO_ESTADO>\n" +
+                    "LISTAR_CANDIDATURAS\n" +
+                    "ACEITAR_CANDIDATURA|<ID_CANDIDATURA>\n" +
+                    "SAIR\n" +
+                    "--------------------------------------------------\n" +
+                    "Estados disponíveis: " + Arrays.toString(EstadoAlojamento.values()) + "\n" +
+                    "--------------------------------------------------\n";
+
+    private boolean isAdmin = false;
+
     private static final String MENU =
             "--------------------------------------------------\n" +
                     "| Bem-vindo ao Sistema de Gestão de Alojamentos |\n" +
