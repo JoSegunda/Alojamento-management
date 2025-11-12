@@ -53,4 +53,6 @@ public class AlojamentoService {
 
         return alojamentoRepository.updateEstado(alojamentoId, novoEstado);
     }
+    // Listar alojamentos por cidade
+
 }
