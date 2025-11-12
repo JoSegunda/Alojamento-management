@@ -40,9 +40,10 @@ public class CandidatoRepository {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 candidato.setId(rs.getInt("id"));
-                System.out.println("Candidato salvo. ID: " + candidato.getId());
+                System.out.printf("Candidato salvo. ID: %d%n", candidato.getId());
                 return candidato;
             }
             throw new SQLException("Falha ao obter o ID do candidato após a inserção.");
+        }
     }
 }
