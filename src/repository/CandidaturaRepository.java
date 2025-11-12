@@ -21,14 +21,14 @@ public class CandidaturaRepository {
         String SQL = "INSERT INTO candidatura (alojamento_id, candidato_id, data_candidatura, estado) VALUES (?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+             PreparedStatement pStatement = conn.prepareStatement(SQL)) {
 
-            pstmt.setInt(1, candidatura.getAlojamentoId());
-            pstmt.setInt(2, candidatura.getCandidatoId());
-            pstmt.setDate(3, Date.valueOf(candidatura.getDataCandidatura()));
-            pstmt.setString(4, candidatura.getEstado().name());
+            pStatement.setInt(1, candidatura.getAlojamentoId());
+            pStatement.setInt(2, candidatura.getCandidatoId());
+            pStatement.setDate(3, Date.valueOf(candidatura.getDataCandidatura()));
+            pStatement.setString(4, candidatura.getEstado().name());
 
-            ResultSet rs = pstmt.executeQuery();
+            ResultSet rs = pStatement.executeQuery();
 
             if (rs.next()) {
                 candidatura.setId(rs.getInt("id"));
