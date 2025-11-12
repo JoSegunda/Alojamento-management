@@ -1,3 +1,5 @@
+package server;
+
 import repository.AlojamentoRepository;
 import repository.CandidatoRepository;
 import repository.CandidaturaRepository;

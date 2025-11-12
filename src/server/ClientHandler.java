@@ -1,7 +1,8 @@
+package server;
+
 import model.Alojamento;
 import model.Alojamento.EstadoAlojamento;
 import model.Candidato;
-import model.Candidato.Sexo;
 import model.Candidatura;
 import service.AlojamentoService;
 import service.CandidatoService;
