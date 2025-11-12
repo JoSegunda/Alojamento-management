@@ -148,16 +148,16 @@ public class ClientHandler implements Runnable {
     }
 
     private String handleVerificarEstadoCandidatura(int candidaturaId) throws SQLException {
-        Optional<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
+        List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
         if (candidaturaOpt.isEmpty())
             return "ERRO|Candidatura ID " + candidaturaId + " não encontrada.";
-        Candidatura candidatura = candidaturaOpt.get();
+        Candidatura candidatura = candidaturaOpt.getFirst();
         return "SUCESSO|Candidatura ID " + candidatura.getId()
                 + " está com estado: " + candidatura.getEstado();
     }
 
     private String handleListarAlojamentosDisponiveis() throws SQLException {
-        List<Alojamento> disponiveis = alojamentoService.listarAlojamentosDisponiveis();
+        List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
         if (disponiveis.isEmpty())
             return "SUCESSO|Nenhum alojamento disponível no momento.";
