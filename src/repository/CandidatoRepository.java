@@ -21,5 +21,5 @@ public class CandidatoRepository {
                 EstadoCandidato.valueOf(rs.getString("estado").toUpperCase())
         );
     }
-
+    //Insere um novo candidato no PostgreSQL.
 }
