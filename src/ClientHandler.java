@@ -123,7 +123,6 @@ public class ClientHandler implements Runnable {
         model.Candidatura candidatura = candidaturaService.submeterCandidatura(alojamentoId, candidatoId);
         return "SUCESSO|Candidatura ID " + candidatura.getId() + " submetida com sucesso. Estado: " + candidatura.getEstado();
     }
-
     // COMANDO 2: Verificar estado da candidatura
     private String handleVerificarEstadoCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
         // Assume que existe um método findById ou verificarEstado no serviço
@@ -136,10 +135,9 @@ public class ClientHandler implements Runnable {
         Candidatura candidatura = candidaturaOpt.get();
         return "SUCESSO|ESTADO_CANDIDATURA|" + candidatura.getId() + "|" + candidatura.getEstado().name();
     }
-
     // COMANDO 3: Verificar alojamento disponível + capacidade
     private String handleListarAlojamentosDisponiveis() throws IllegalArgumentException, SQLException {
-        // Assume que este método busca alojamentos APROVADOS e ATIVOS.
+        // Assume que este  busca alojamentos e ATIVOS.
         List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
         if (disponiveis.isEmpty()) {
@@ -158,7 +156,18 @@ public class ClientHandler implements Runnable {
         return sb.toString();
     }
 
-    // --- (Restante dos métodos handlers, como handleRegistarAlojamento, ficam inalterados) ---
+    private String handleRegistarAlojamento(String[] args) throws IllegalArgumentException, SQLException {
+        // Assume a ordem: Nome, Cidade, Capacidade
+        Alojamento novoAlojamento = new Alojamento(
+                args[0],
+                args[1],
+                Integer.parseInt(args[2])
+        );
+
+        Alojamento registado = alojamentoService.registarAlojamento(novoAlojamento);
+        return "SUCESSO|Alojamento ID " + registado.getId() + " registado como " + registado.getEstado();
+    }
+
 
     private void closeResources() {
         try {
