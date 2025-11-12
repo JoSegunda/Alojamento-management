@@ -1,3 +1,10 @@
+import repository.AlojamentoRepository;
+import repository.CandidatoRepository;
+import repository.CandidaturaRepository;
+import service.AlojamentoService;
+import service.CandidatoService;
+import service.CandidaturaService;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,8 +13,21 @@ public class Server {
     private static final int PORT = 12345;
 
     public static void main(String[] args) {
-        // Instancia o server socket na porta 12345
+        System.out.println("Iniciando Servidor...");
 
+        // Inicialização de dos repositórios
+        AlojamentoRepository alojamentoRepository = new AlojamentoRepository();
+        CandidatoRepository candidatoRepository = new CandidatoRepository();
+        CandidaturaRepository candidaturaRepository = new CandidaturaRepository();
+
+        AlojamentoService alojamentoService = new AlojamentoService(alojamentoRepository);
+        CandidatoService candidatoService = new CandidatoService(candidatoRepository);
+        CandidaturaService candidaturaService = new CandidaturaService(
+                candidaturaRepository, alojamentoRepository, candidatoRepository
+        );
+
+
+        // Instancia o server socket na porta 12345
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Servidor Iniciado na porta" + PORT + ". Aguardando conexões...");
 
