@@ -3,6 +3,8 @@ package repository;
 import model.Candidatura;
 import model.Candidatura.EstadoCandidatura; // Importar o ENUM
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class CandidaturaRepository {
@@ -83,5 +85,22 @@ public class CandidaturaRepository {
 
 
     // M para listar candidatura por candidato
+    public List<Candidatura> listarPorCandidato(int candidatoId) throws SQLException {
+        List<Candidatura> lista = new ArrayList<>();
+
+        String SQL = "SELECT * FROM candidatura WHERE candidato_id=? ORDER BY data_candidatura DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+
+            stmt.setInt(1, candidatoId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(mapResultSetToCandidatura(rs));
+            }
+        }
+        return lista;
+    }
 
 }
