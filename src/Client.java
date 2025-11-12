@@ -27,10 +27,9 @@ public class Client {
             String line;
 
             // 🔹 Lê o menu inicial (antes de o utilizador digitar qualquer coisa)
-            System.out.println("----- MENSAGEM DO SERVIDOR -----");
+            in.readLine();
             while ((line = in.readLine()) != null && !line.isEmpty()) {
                 System.out.println(line);
-                if (line.startsWith("--------------------------------------------------")) break;
             }
 
             while (true) {
@@ -43,15 +42,11 @@ public class Client {
                     System.out.println("Encerrando sessão...");
                     break;
                 }
-
                 // 🔹 Ler múltiplas linhas até o servidor mandar uma linha vazia
-                System.out.println("\n----- RESPOSTA DO SERVIDOR -----");
                 while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
-                    System.out.println(line);
-                    // opcional: sair se o servidor enviar o menu completo
-                    if (line.contains("SAIR -> Encerra a sessão")) break;
+                    System.out.println("\nRESPOSTA DO SERVIDOR: "+line);
+
                 }
-                System.out.println("--------------------------------\n");
             }
 
         } catch (Exception e) {

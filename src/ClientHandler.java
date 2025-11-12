@@ -43,16 +43,20 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         System.out.println("[HANDLER] Conexão iniciada com cliente na porta " + clientPort);
-        out.println(MENU);
-        out.flush();
+
         try {
             // Mostra o menu imediatamente
-
+            out.println(MENU);
+            out.flush();
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 inputLine = inputLine.trim();
-                if (inputLine.isEmpty()) continue;
+
+                if (inputLine.isEmpty()) {
+                    System.out.println("Escolha pelo menos uma opção");
+                    continue;
+                };
 
                 System.out.println("[CLIENTE " + clientPort + "] Comando recebido: " + inputLine);
 
@@ -266,13 +270,5 @@ public class ClientHandler implements Runnable {
                     "1 -> Candidatar a alojamento (1|alojId|candId)\n" +
                     "2 -> Verificar estado da candidatura (2|candId)\n" +
                     "3 -> Listar alojamentos disponíveis\n" +
-                    "--------------------------------------------------\n" +
-                    "ADMINISTRADOR:\n" +
-                    "REGISTAR_ALOJAMENTO|Nome|Cidade|Capacidade\n" +
-                    "ATUALIZAR_ESTADO_ALOJAMENTO|id|ESTADO\n" +
-                    "ACEITAR_CANDIDATURA|id\n" +
-                    "REGISTAR_CANDIDATO|Nome|Email|Telefone|Sexo|Curso\n" +
-                    "--------------------------------------------------\n" +
-                    "SAIR -> Encerra a sessão\n" +
-                    "--------------------------------------------------";
+                    "--------------------------------------------------\n";
 }
