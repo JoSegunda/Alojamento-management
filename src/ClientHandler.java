@@ -51,6 +51,7 @@ public class ClientHandler implements Runnable {
                     "Pressione [1] -> Candidatura para alojamento.\n" +
                     "Pressione [2] -> Verificar estado da candidatura.\n" +
                     "Pressione [3] -> Listar alojamentos disponíveis.\n" +
+                    "Pressione [4] -> SAIR.\n" +
                     "--------------------------------------------------\n";
 
     @Override
@@ -70,7 +71,17 @@ public class ClientHandler implements Runnable {
                 System.out.println("[CLIENTE " + clientPort + "] Comando recebido: " + inputLine);
 
                 try {
+                    // Verificar se é comando de saída
+                    if (inputLine.startsWith("SAIR|")) {
+                        out.println(inputLine);
+                        out.println(); // linha em branco
+                        break; // Sai do loop e encerra a conexão
+                    }
+
                     optionInput = Integer.parseInt(inputLine);
+
+
+
                     String response = processUserCommand(optionInput);
 
                     out.println(response);
@@ -197,12 +208,14 @@ public class ClientHandler implements Runnable {
             try {
                 candidaturaId = Integer.parseInt(candidaturaInput.trim());
             } catch (NumberFormatException e) {
+                out.println();
                 return "ERRO|ID de candidatura inválido.";
             }
 
             List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
 
             if (candidaturaOpt.isEmpty()) {
+                out.println();
                 return "ERRO|Candidatura com ID " + candidaturaId + " não encontrada.";
             }
 
@@ -244,11 +257,12 @@ public class ClientHandler implements Runnable {
                 resultado += "\nAlojamento: Erro ao carregar informações";
             }
 
-            // ⚠️ IMPORTANTE: Enviar linha vazia no final
+            // IMPORTANTE: Enviar linha vazia no final
             out.println();
             return resultado;
 
         } catch (Exception e) {
+            out.println();
             System.err.println("[ERRO] Em handleVerificarEstadoCandidatura: " + e.getMessage());
             out.println();
             return "ERRO|Falha ao verificar candidatura: " + e.getMessage();
