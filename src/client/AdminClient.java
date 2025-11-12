@@ -10,7 +10,7 @@ public class AdminClient {
     private static final int ServerPort = 12345;
 
     public static void main(String[] args) {
-        System.out.println("🛠️  Cliente Admin conectando...");
+        System.out.println("Cliente Admin conectando...");
 
         try (
                 Socket socket = new Socket(ServerIP, ServerPort);
@@ -20,7 +20,7 @@ public class AdminClient {
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))
         ) {
-            System.out.println("✅ Conectado ao servidor em " + ServerIP + ":" + ServerPort);
+            System.out.println("Conectado ao servidor em " + ServerIP + ":" + ServerPort);
 
             // Autenticação admin
             out.println("ADMIN");
@@ -29,32 +29,32 @@ public class AdminClient {
             String userInput;
             String line;
 
-            // 🔹 Lê o menu inicial do admin
+            // Lê o menu inicial do admin
             while ((line = in.readLine()) != null && !line.isEmpty()) {
                 System.out.println(line);
             }
 
             while (true) {
-                System.out.print("\n🛠️  Admin: ");
+                System.out.print("\nAdmin: ");
                 userInput = scanner.nextLine();
 
                 out.println(userInput);
 
                 if ("SAIR".equalsIgnoreCase(userInput.trim())) {
-                    System.out.println("👋 A sair...");
+                    System.out.println("A sair...");
                     break;
                 }
 
                 // 🔹 Processar resposta do servidor
                 while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
-                    System.out.println("📡 Servidor: " + line);
+                    System.out.println("Servidor: " + line);
                 }
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Erro de comunicação: " + e.getMessage());
+            System.err.println("Erro de comunicação: " + e.getMessage());
         } finally {
-            System.out.println("🔒 Conexão admin encerrada.");
+            System.out.println("Conexão admin encerrada.");
         }
     }
 }
