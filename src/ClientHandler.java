@@ -242,4 +242,24 @@ public class ClientHandler implements Runnable {
             System.err.println("Erro ao fechar recursos: " + e.getMessage());
         }
     }
+
+    // Define o menu como uma constante para clareza
+    private static final String MENU =
+            "--------------------------------------------------\n" +
+                    "| Bem-vindo ao Sistema de Gestão de Alojamentos! |\n" +
+                    "--------------------------------------------------\n" +
+                    "Comandos disponíveis (Use: OPÇÃO|ARG1|ARG2...):\n" +
+                    "--------------------------------------------------\n" +
+                    "USUÁRIO:\n" +
+                    "1|ID_ALOJAMENTO|ID_CANDIDATO -> Candidatar a alojamento\n" +
+                    "2|ID_CANDIDATURA             -> Verificar estado da candidatura\n" +
+                    "3                            -> Verificar alojamentos disponíveis + capacidade\n" +
+                    "SAIR                         -> Encerrar a conexão\n" +
+                    "--------------------------------------------------\n" +
+                    "ADMINISTRATIVO (String|ARG1...):\n" +
+                    "REGISTAR_ALOJAMENTO|Nome|Cidade|Capacidade\n" +
+                    "ATUALIZAR_ESTADO_ALOJAMENTO|ID|ESTADO_NOVO (Ex: APROVADO)\n" +
+                    "ACEITAR_CANDIDATURA|ID_CANDIDATURA\n" +
+                    "REGISTAR_CANDIDATO|Nome|Email|Telefone|SEXO|Curso\n" +
+                    "--------------------------------------------------\n";
 }
