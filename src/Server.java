@@ -32,13 +32,13 @@ public class Server {
         try {
             DatabaseConnection.getConnection();
         } catch (SQLException e) {
-            System.err.println("ERRO FATAL: Falha na conexão com a base de dados. Encerrando o servidor.");
+            System.err.println("ERRO: Falha na conexão com a base de dados. Encerrando o servidor.");
             return; // Encerra o programa
         }
 
         // Instancia o server socket na porta 12345
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Servidor Iniciado na porta" + PORT + ". Aguardando conexões...");
+            System.out.println("Servidor Iniciado na porta " + PORT + ". Aguardando conexões...");
 
             while(true){
                 // Accept() bloqueia a execução até que o servidor receba um pedido de conexão

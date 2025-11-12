@@ -18,8 +18,10 @@ public class Client {
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))
         ) {
+
             System.out.println("Conectado ao servidor em " + ServerIP + ":" + ServerPort);
             System.out.println("Digite 'SAIR' para desconectar.\n");
+            System.out.println("Pressione qualquer tecla para continuar");
 
             String userInput;
             String line;

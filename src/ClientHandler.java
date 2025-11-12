@@ -12,8 +12,8 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
+@SuppressWarnings("ALL")
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final PrintWriter out;
@@ -43,11 +43,11 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         System.out.println("[HANDLER] Conexão iniciada com cliente na porta " + clientPort);
-
+        out.println(MENU);
+        out.flush();
         try {
             // Mostra o menu imediatamente
-            out.println(MENU);
-            out.flush();
+
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
@@ -61,7 +61,7 @@ public class ClientHandler implements Runnable {
                 // Envia a resposta e o menu novamente
                 out.println(response);
                 out.println(); // linha em branco
-                out.println(MENU);
+
 
                 System.out.println("[CLIENTE " + clientPort + "] Resposta enviada.");
                 if (inputLine.equalsIgnoreCase("SAIR")) break;
@@ -74,9 +74,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // -------------------------------------------------------
     // PROCESSAMENTO DE COMANDOS
-    // -------------------------------------------------------
     private String processCommand(String command) {
         command = command.trim();
         if (command.isEmpty()) return "ERRO|Comando vazio";
