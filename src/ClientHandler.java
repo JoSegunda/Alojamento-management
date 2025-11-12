@@ -93,26 +93,24 @@ public class ClientHandler implements Runnable {
     }
 
     private String processUserCommand(int command){
+
         try{
             switch (command){
                 case 1 -> {
-                    String result = handleRegistarCandidato();
-                    // Já foi enviada a linha vazia no handleRegistarCandidato()
-                    return result;
+                    return handleRegistarCandidato();
                 }
                 case 3 -> {
                     return handleListarAlojamentosDisponiveis();
                 }
                 default -> {
-                    return "ERRO|Opção não reconhecida: " + command;
+                    return "Erro| opção não reconhecida: " + command;
                 }
+
             }
         } catch (SQLException e) {
-            out.println(); // Enviar linha vazia em caso de erro
-            return "ERRO_BD|" + e.getMessage();
+            return "Erro BD | "+ e.getMessage();
         } catch (IOException e) {
-            out.println(); // Enviar linha vazia em caso de erro
-            return "ERRO_IO|" + e.getMessage();
+            return "Erro BD | "+ e.getMessage();
         }
     }
 
@@ -321,7 +319,6 @@ public class ClientHandler implements Runnable {
         Candidato novoCandidato = new Candidato(nome, email, telefone, sexo, curso);
         Candidato registado = candidatoService.registarCandidato(novoCandidato, alojamentoId);
 
-        out.println();
         return "SUCESSO|Candidato " + registado.getNome() +
                 " (ID: " + registado.getId() + ") registado e candidatura submetida ao alojamento " + alojamentoId + ".";
     }

@@ -28,16 +28,38 @@ public class Client {
             while ((line = in.readLine()) != null && !line.isEmpty()) {
                 System.out.println(line);
             }
+            // NO CLIENTE - adicione esta lógica
             while (true) {
                 System.out.print("Você: ");
                 userInput = scanner.nextLine();
-
                 out.println(userInput);
 
-                // 🔹 Ler múltiplas linhas até o servidor mandar uma linha vazia
+                // Se o usuário digitou "1", trata-se de um fluxo interativo
+                if ("1".equals(userInput.trim())) {
+                    System.out.println("🌀 Modo de registo ativado...");
 
-                while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
-                    System.out.println("\nRESPOSTA DO SERVIDOR: "+line);
+                    // Ler e responder a cada prompt individualmente
+                    String serverLine;
+                    while ((serverLine = in.readLine()) != null) {
+                        System.out.println("Servidor: " + serverLine);
+
+                        // Se for uma linha vazia, sai do loop
+                        if (serverLine.trim().isEmpty()) {
+                            break;
+                        }
+
+                        // Se for um prompt (termina com ": "), pedir input ao usuário
+                        if (serverLine.endsWith(": ") || serverLine.contains(":")) {
+                            System.out.print("Sua resposta: ");
+                            String resposta = scanner.nextLine();
+                            out.println(resposta);
+                        }
+                    }
+                } else {
+                    // Comportamento normal para outros comandos
+                    while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
+                        System.out.println("\nRESPOSTA DO SERVIDOR: " + line);
+                    }
                 }
             }
 
