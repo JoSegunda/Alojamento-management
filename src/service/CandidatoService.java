@@ -13,4 +13,22 @@ public class CandidatoService {
     public CandidatoService(CandidatoRepository candidatoRepository) {
         this.candidatoRepository = candidatoRepository;
     }
+
+    public Candidato registarCandidato(Candidato candidato) throws IllegalArgumentException, SQLException {
+        // Verificar
+        if (candidato == null) {
+            throw new IllegalArgumentException("O objeto Candidato não pode ser nulo.");
+        }
+        if (candidato.getNome() == null || candidato.getNome().trim().isEmpty()) {
+            throw new IllegalArgumentException("O nome do candidato é obrigatório.");
+        }
+        if (!candidato.getEmail().contains("@")) { // Validação de email
+            throw new IllegalArgumentException("Formato de email inválido.");
+        }
+        // verificar se já existe candidato
+        if (candidatoRepository.findByEmail(candidato.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Já existe um candidato registado com este email.");
+        }
+        return candidatoRepository.save(candidato);
+    }
 }
