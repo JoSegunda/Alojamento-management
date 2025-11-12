@@ -1,5 +1,6 @@
 import model.Alojamento;
 import model.Alojamento.EstadoAlojamento;
+import model.Candidato;
 import model.Candidato.Sexo;
 import model.Candidatura;
 import service.AlojamentoService;
@@ -175,6 +176,23 @@ public class ClientHandler implements Runnable {
         }
         return "ERRO|Falha na atualização do estado do alojamento.";
     }
+
+    private String handleRegistarCandidato(String[] args) throws IllegalArgumentException, SQLException {
+        // Assume a ordem: Nome, Email, Telefone, Sexo, Curso
+        // Converte a string de Sexo para o ENUM
+        Sexo sexo = Sexo.valueOf(args[3].toUpperCase());
+
+        Candidato novoCandidato = new model.Candidato(
+                args[0],
+                args[1],
+                args[2],
+                sexo,
+                args[4]
+        );
+        model.Candidato registado = candidatoService.registarCandidato(novoCandidato);
+        return "SUCESSO|Candidato ID " + registado.getId() + " registado.";
+    }
+
 
     private void closeResources() {
         try {
