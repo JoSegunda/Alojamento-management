@@ -24,4 +24,6 @@ public class CandidaturaService {
         this.alojamentoRepository = alojamentoRepository;
         this.candidatoRepository = candidatoRepository;
     }
+    // Method para submeter candidatura
+
 }
