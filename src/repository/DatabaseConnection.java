@@ -35,7 +35,7 @@ public class DatabaseConnection {
     }
 
     /** Fecha uma conexão específica (em vez de uma única estática global). */
-    public static void closeConnection(Connection conn) {
+    public static void closeConnection() {
         if (conn != null) {
             try {
                 conn.close();
