@@ -18,6 +18,20 @@ public class CandidaturaRepository {
     }
     // Insere uma nova candidatura no PostgreSQL.
     public Candidatura save(Candidatura candidatura) throws SQLException{
+
+        // Verificar se já existe uma candidatura com este id
+        String checkSQL = "SELECT 1 FROM candidatura WHERE alojamento_id=? AND candidato_id=? AND estado IN ('SUBMETIDA','EM_ANALISE')";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSQL)) {
+            checkStmt.setInt(1, candidatura.getAlojamentoId());
+            checkStmt.setInt(2, candidatura.getCandidatoId());
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                throw new SQLException("Já existe uma candidatura ativa para este alojamento e candidato.");
+            }
+        }
+
+
         String SQL = "INSERT INTO candidatura (alojamento_id, candidato_id, data_candidatura, estado) VALUES (?, ?, ?, ?) RETURNING id";
 
         try (Connection conn = DatabaseConnection.getConnection();
