@@ -2,6 +2,7 @@ package service;
 
 import model.Candidato;
 import model.Candidato.EstadoCandidato;
+import model.Candidatura;
 import repository.CandidatoRepository;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -9,13 +10,16 @@ import java.util.Optional;
 public class CandidatoService {
 
     private final CandidatoRepository candidatoRepository;
+    private final CandidaturaService candidaturaService;
 
-    public CandidatoService(CandidatoRepository candidatoRepository) {
+    public CandidatoService(CandidatoRepository candidatoRepository, CandidaturaService candServ) {
         this.candidatoRepository = candidatoRepository;
+        this.candidaturaService = candServ;
     }
 
     public Candidato registarCandidato(Candidato candidato) throws IllegalArgumentException, SQLException {
         // Verificar
+        Candidato novo = candidatoRepository.save(candidato);
         if (candidato == null) {
             throw new IllegalArgumentException("O objeto Candidato não pode ser nulo.");
         }
@@ -29,6 +33,8 @@ public class CandidatoService {
         if (candidatoRepository.findByEmail(candidato.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Já existe um candidato registado com este email.");
         }
+        Candidatura candidatura = new Candidatura(alojamentoId, novo.getId());
+        candidaturaService.submeterCandidatura(alojamentoId, novo.getId());
         return candidatoRepository.save(candidato);
     }
     // M para suspender candidato

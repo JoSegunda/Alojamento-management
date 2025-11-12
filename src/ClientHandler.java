@@ -97,6 +97,9 @@ public class ClientHandler implements Runnable {
         try{
             switch (command){
                 case 1 -> handleRegistarCandidato();
+                case 3 -> {
+                    return handleListarAlojamentosDisponiveis();
+                }
 
             }
         } catch (SQLException e) {
@@ -178,7 +181,7 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Candidatura ID " + candidatura.getId()
                 + " submetida. Estado: " + candidatura.getEstado();
     }
-
+    // Para usuário
     private String handleVerificarEstadoCandidatura(int candidaturaId) throws SQLException {
         List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
         if (candidaturaOpt.isEmpty())
@@ -255,30 +258,24 @@ public class ClientHandler implements Runnable {
     private String handleRegistarCandidato() throws SQLException, IOException {
         String inputLine;
         out.print("Nome: ");
-        inputLine = in.readLine();
-        String nome = inputLine.trim();
-        out.print("Email: ");
-        inputLine = in.readLine();
-        String email = inputLine.trim();
-        out.print("Telefone: ");
-        inputLine = in.readLine();
-        String telefone = inputLine.trim().toUpperCase();
-        out.print("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
+        String nome = in.readLine().trim();
 
-        Sexo sexo;
+        out.print("Email: ");
+        String email = in.readLine().trim();
+
+        out.print("Telefone: ");
+        String telefone = in.readLine().trim();
+
+        out.print("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
+        String sexoStr = in.readLine().trim();
+        Candidato.Sexo sexo;
         try {
-            inputLine = in.readLine();
-            sexo = Sexo.valueOf(inputLine.trim().toUpperCase());
+            sexo = Candidato.Sexo.valueOf(sexoStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
         }
         System.out.print("Curso: ");
-        inputLine = in.readLine();
-        String curso = inputLine.trim();
-
-        Candidato novo = new Candidato(nome, email, telefone, sexo, curso);
-        Candidato registado = candidatoService.registarCandidato(novo);
-
+        String curso = in.readLine().trim();
 
         System.out.println("=================================");
         String s = handleListarAlojamentosDisponiveis();
@@ -286,7 +283,26 @@ public class ClientHandler implements Runnable {
         System.out.println("=================================");
         System.out.println("Em que residência deseja ficar? ");
 
-        return "SUCESSO|Candidato ID " + registado.getId() + " registado.";
+        out.println("Digite o ID do alojamento pretendido: ");
+        String alojamentoInput = in.readLine();
+        int alojamentoId;
+
+        try {
+            alojamentoId = Integer.parseInt(alojamentoInput);
+        } catch (NumberFormatException e) {
+            out.println("ID inválido. Registo cancelado.");
+            return "ERRO|ID de alojamento inválido.";
+        }
+
+        // Cria o candidato e regista
+        Candidato novoCandidato = new Candidato(nome, email, telefone, sexo, curso);
+        Candidato registado = candidatoService.registarCandidato(novoCandidato);
+
+        // Cria automaticamente a candidatura
+        candidaturaService.submeterCandidatura(alojamentoId, registado.getId());
+
+        return "SUCESSO|Candidato " + registado.getNome() +
+                " (ID: " + registado.getId() + ") registado e candidatura submetida ao alojamento " + alojamentoId + ".";
     }
 
     // FECHAR CONEXÃO
