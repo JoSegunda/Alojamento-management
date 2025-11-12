@@ -96,18 +96,22 @@ public class ClientHandler implements Runnable {
 
         try{
             switch (command){
-                case 1 -> handleRegistarCandidato();
+                case 1 -> {
+                    return handleRegistarCandidato();
+                }
                 case 3 -> {
                     return handleListarAlojamentosDisponiveis();
+                }
+                default -> {
+                    return "Erro| opção não reconhecida: " + command;
                 }
 
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            return "Erro BD | "+ e.getMessage();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return "Erro BD | "+ e.getMessage();
         }
-        return "Registo concluído com sucesso.";
     }
 
     // PROCESSAMENTO DE COMANDOS
@@ -258,15 +262,19 @@ public class ClientHandler implements Runnable {
     private String handleRegistarCandidato() throws SQLException, IOException {
         String inputLine;
         out.print("Nome: ");
+        out.flush();
         String nome = in.readLine().trim();
 
         out.print("Email: ");
+        out.flush();
         String email = in.readLine().trim();
 
         out.print("Telefone: ");
+        out.flush();
         String telefone = in.readLine().trim();
 
         out.print("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
+        out.flush();
         String sexoStr = in.readLine().trim();
         Candidato.Sexo sexo;
         try {
@@ -274,16 +282,22 @@ public class ClientHandler implements Runnable {
         } catch (IllegalArgumentException e) {
             return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
         }
-        System.out.print("Curso: ");
+        out.print("Curso: ");
+        out.flush();
         String curso = in.readLine().trim();
 
-        System.out.println("=================================");
+        out.println("=================================");
+        out.flush();
         String s = handleListarAlojamentosDisponiveis();
-        System.out.println(s);
-        System.out.println("=================================");
-        System.out.println("Em que residência deseja ficar? ");
+        out.println(s);
+        out.flush();
+        out.println("=================================");
+        out.flush();
+        out.println("Em que residência deseja ficar? ");
+        out.flush();
 
         out.println("Digite o ID do alojamento pretendido: ");
+        out.flush();
         String alojamentoInput = in.readLine();
         int alojamentoId;
 
@@ -296,10 +310,7 @@ public class ClientHandler implements Runnable {
 
         // Cria o candidato e regista
         Candidato novoCandidato = new Candidato(nome, email, telefone, sexo, curso);
-        Candidato registado = candidatoService.registarCandidato(novoCandidato);
-
-        // Cria automaticamente a candidatura
-        candidaturaService.submeterCandidatura(alojamentoId, registado.getId());
+        Candidato registado = candidatoService.registarCandidato(novoCandidato, alojamentoId);
 
         return "SUCESSO|Candidato " + registado.getNome() +
                 " (ID: " + registado.getId() + ") registado e candidatura submetida ao alojamento " + alojamentoId + ".";

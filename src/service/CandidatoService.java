@@ -17,7 +17,7 @@ public class CandidatoService {
         this.candidaturaService = candServ;
     }
 
-    public Candidato registarCandidato(Candidato candidato) throws IllegalArgumentException, SQLException {
+    public Candidato registarCandidato(Candidato candidato, int alojamentoId) throws IllegalArgumentException, SQLException {
         // Verificar
         Candidato novo = candidatoRepository.save(candidato);
         if (candidato == null) {

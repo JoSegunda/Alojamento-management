@@ -23,10 +23,11 @@ public class Server {
         CandidaturaRepository candidaturaRepository = new CandidaturaRepository();
 
         AlojamentoService alojamentoService = new AlojamentoService(alojamentoRepository);
-        CandidatoService candidatoService = new CandidatoService(candidatoRepository);
         CandidaturaService candidaturaService = new CandidaturaService(
                 candidaturaRepository, alojamentoRepository, candidatoRepository
         );
+        CandidatoService candidatoService = new CandidatoService(candidatoRepository, candidaturaService);
+
 
         // Testar conexão a base de dados
         try {
