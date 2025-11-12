@@ -25,5 +25,24 @@ public class CandidatoRepository {
     public Candidato save(Candidato candidato) throws SQLException {
         String SQL = "INSERT INTO candidatos (nome, email, telefone, sexo, curso, data_registo, estado) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SQL)) {
+
+            // ... Mapeamento dos campos do candidato para pstmt ...
+            pstmt.setString(1, candidato.getNome());
+            pstmt.setString(2, candidato.getEmail());
+            pstmt.setString(3, candidato.getTelefone());
+            pstmt.setString(4, candidato.getSexo().name());
+            pstmt.setString(5, candidato.getCurso());
+            pstmt.setDate(6, Date.valueOf(candidato.getDataRegisto())); // Converte LocalDate para SQL Date
+            pstmt.setString(7, candidato.getEstado().name());
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                candidato.setId(rs.getInt("id"));
+                System.out.println("Candidato salvo. ID: " + candidato.getId());
+                return candidato;
+            }
+            throw new SQLException("Falha ao obter o ID do candidato após a inserção.");
     }
 }
