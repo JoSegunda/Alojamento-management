@@ -80,4 +80,8 @@ public class CandidaturaRepository {
             return rows > 0;
         }
     }
+
+
+    // M para listar candidatura por candidato
+
 }
