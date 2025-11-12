@@ -15,7 +15,7 @@ public class AlojamentoRepository {
                 rs.getString("nome"),
                 rs.getString("cidade"),
                 rs.getBoolean("active"),
-                rs.getInt("Capacidade"),
+                rs.getInt("capacidade"),
                 EstadoAlojamento.valueOf(rs.getString("estado").toUpperCase())
         );
     }
@@ -59,4 +59,30 @@ public class AlojamentoRepository {
             return affectedRows > 0;
         }
     }
+    public Alojamento findById(int id) throws SQLException {
+        String SQL = "SELECT * FROM alojamento WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToAlojamento(rs);
+            }
+            return null;
+        }
+    }
+
+    public List<Alojamento> findAll() throws SQLException {
+        List<Alojamento> lista = new ArrayList<>();
+        String SQL = "SELECT * FROM alojamento ORDER BY id";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapResultSetToAlojamento(rs));
+            }
+        }
+        return lista;
+    }
+
 }
