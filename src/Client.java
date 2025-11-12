@@ -23,42 +23,43 @@ public class Client {
             String userInput;
             String line;
 
-            // 🔹 Lê o menu inicial (antes de o utilizador digitar qualquer coisa)
-            in.readLine();
+            // 🔹 Lê o menu inicial
             while ((line = in.readLine()) != null && !line.isEmpty()) {
                 System.out.println(line);
             }
-            // NO CLIENTE - adicione esta lógica
+
             while (true) {
                 System.out.print("Você: ");
                 userInput = scanner.nextLine();
+
                 out.println(userInput);
 
-                // Se o usuário digitou "1", trata-se de um fluxo interativo
+                // 🔹 Se for o comando 1 (registo), modo interativo especial
                 if ("1".equals(userInput.trim())) {
                     System.out.println("🌀 Modo de registo ativado...");
 
-                    // Ler e responder a cada prompt individualmente
-                    String serverLine;
-                    while ((serverLine = in.readLine()) != null) {
-                        System.out.println("Servidor: " + serverLine);
-
-                        // Se for uma linha vazia, sai do loop
-                        if (serverLine.trim().isEmpty()) {
+                    // Processar fluxo interativo
+                    while ((line = in.readLine()) != null) {
+                        // Se for linha vazia, termina o fluxo
+                        if (line.trim().isEmpty()) {
                             break;
                         }
 
-                        // Se for um prompt (termina com ": "), pedir input ao usuário
-                        if (serverLine.endsWith(": ") || serverLine.contains(":")) {
+                        // Se for um prompt (termina com ":"), responder
+                        if (line.endsWith(":") || line.contains(":")) {
+                            System.out.println("Servidor: " + line);
                             System.out.print("Sua resposta: ");
                             String resposta = scanner.nextLine();
                             out.println(resposta);
+                        } else {
+                            // Se não for prompt, apenas mostrar a mensagem
+                            System.out.println("Servidor: " + line);
                         }
                     }
                 } else {
-                    // Comportamento normal para outros comandos
+                    // 🔹 Comportamento normal para outros comandos
                     while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
-                        System.out.println("\nRESPOSTA DO SERVIDOR: " + line);
+                        System.out.println("Servidor: " + line);
                     }
                 }
             }
