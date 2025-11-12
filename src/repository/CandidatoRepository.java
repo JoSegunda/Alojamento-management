@@ -63,4 +63,6 @@ public class CandidatoRepository {
             return Optional.empty(); // Retorna vazio se não for encontrado
         }
     }
+
+    // M para encontrar candidatos através do email
 }
