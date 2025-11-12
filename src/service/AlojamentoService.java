@@ -39,13 +39,11 @@ public class AlojamentoService {
         if (alojamento == null) {
             throw new IllegalArgumentException("Alojamento com ID " + alojamentoId + " não encontrado.");
         }
-
         // Transição de estado
         // Não se pode aprovar um alojamento que está incompleto sem correções
         if (alojamento.getEstado() == EstadoAlojamento.INCOMPLETO && novoEstado == EstadoAlojamento.APROVADO) {
             throw new IllegalArgumentException("Não é possível aprovar um alojamento INCOMPLETO diretamente.");
         }
-
         // Se o estado for o mesmo, não faz nada
         if (alojamento.getEstado() == novoEstado) {
             return true;

@@ -50,5 +50,23 @@ public class CandidaturaService {
         return candidaturaRepository.save(novaCandidatura);
     }
     // M para Alterar o estado da candidatura
+    public boolean aceitarCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
 
+        Optional<Candidatura> candidaturaOpt = candidaturaRepository.findById(candidaturaId);
+
+        if (candidaturaOpt.isEmpty()) {
+            throw new IllegalArgumentException("Candidatura com ID " + candidaturaId + " não encontrada.");
+        }
+        Candidatura candidatura = candidaturaOpt.get();
+
+        // Só se pode aceitar se o estado atual for SUBMETIDA ou EM_ANALISE
+        if (!candidatura.isAtiva()) {
+            throw new IllegalArgumentException("A candidatura não está em um estado que permita aceitação.");
+        }
+        candidatura.aceitar();
+
+        // 2. TODO: recusar candidaturas.
+
+        return candidaturaRepository.updateEstado(candidaturaId, EstadoCandidatura.ACEITE);
+    }
 }
