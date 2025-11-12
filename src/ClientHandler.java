@@ -137,13 +137,13 @@ public class ClientHandler implements Runnable {
     // COMANDO 2: Verificar estado da candidatura
     private String handleVerificarEstadoCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
         // Assume que existe um méthod findById ou verificarEstado no serviço
-        Optional<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
+        List<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
 
         if (candidaturaOpt.isEmpty()) {
             return "ERRO|Candidatura ID " + candidaturaId + " não encontrada.";
         }
 
-        Candidatura candidatura = candidaturaOpt.get();
+        Candidatura candidatura = candidaturaOpt.getFirst();
         return "SUCESSO|ESTADO_CANDIDATURA|" + candidatura.getId() + "|" + candidatura.getEstado().name();
     }
     // COMANDO 3: Verificar alojamento disponível + capacidade
