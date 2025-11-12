@@ -11,4 +11,8 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class CandidaturaService {
+
+    private final CandidaturaRepository candidaturaRepository;
+    private final AlojamentoRepository alojamentoRepository;
+    private final CandidatoRepository candidatoRepository;
 }
