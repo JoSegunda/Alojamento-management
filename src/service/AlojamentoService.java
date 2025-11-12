@@ -7,4 +7,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class AlojamentoService {
+
+    private final AlojamentoRepository alojamentoRepository;
+
+    public AlojamentoService(AlojamentoRepository alojamentoRepository) {
+        this.alojamentoRepository = alojamentoRepository;
+    }
 }
