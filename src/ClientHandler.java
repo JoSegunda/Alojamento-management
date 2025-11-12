@@ -38,14 +38,14 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("✅ [HANDLER " + clientPort + "] Thread de processamento iniciada.");
+        System.out.println("Handler iniciado...");
 
         try {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println("⬅️ [CLIENTE " + clientPort + "] Comando Recebido: " + inputLine);
+                System.out.println("[CLIENTE " + clientPort + "] Comando Recebido: " + inputLine);
 
-                // Processa a requisição e envia a resposta
+                // Processa o pedido e envia a resposta
                 String response = processCommand(inputLine);
                 out.println(response);
                 System.out.println("➡️ [CLIENTE " + clientPort + "] Resposta Enviada: " + response.split("\\|")[0]);
