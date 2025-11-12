@@ -33,10 +33,10 @@ public class CandidaturaService {
         Optional<Candidato> candidatoOpt = candidatoRepository.findById(candidatoId);
 
         if (alojamento == null) {
-            throw new IllegalArgumentException("Alojamento ID " + alojamentoId + " não existe.");
+            throw new IllegalArgumentException("Alojamento não existe.");
         }
         if (candidatoOpt.isEmpty()) {
-            throw new IllegalArgumentException("Candidato ID " + candidatoId + " não existe.");
+            throw new IllegalArgumentException("Candidato não existe.");
         }
         // O alojamento deve estar aprovado para receber candidaturas
         if (alojamento.getEstado() != Alojamento.EstadoAlojamento.APROVADO) {
@@ -44,7 +44,7 @@ public class CandidaturaService {
         }
 
         // Verifica se o candidato já tem uma candidatura ativa para este alojamento
-        if (candidaturaRepository.listarPorCandidato(alojamentoId, candidatoId).isPresent()) {
+        if (candidaturaRepository.findByAlojamentoAndCandidato(alojamentoId, candidatoId).isPresent()) {
             throw new IllegalArgumentException("O candidato já submeteu uma candidatura para este alojamento.");
         }
         Candidatura novaCandidatura = new Candidatura(alojamentoId, candidatoId);
@@ -56,7 +56,7 @@ public class CandidaturaService {
         List<Candidatura> candidaturaOpt = candidaturaRepository.listarPorCandidato(candidaturaId);
 
         if (candidaturaOpt.isEmpty()) {
-            throw new IllegalArgumentException("Candidatura com ID " + candidaturaId + " não encontrada.");
+            throw new IllegalArgumentException("Candidatura não encontrada.");
         }
         Candidatura candidatura = candidaturaOpt.getFirst();
 
