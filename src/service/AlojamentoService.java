@@ -31,4 +31,6 @@ public class AlojamentoService {
         // Assume-se que o estado inicial é PENDENTE (definido no construtor)
         return alojamentoRepository.save(alojamento);
     }
+    // M para atualizar o estado do alojamento
+
 }
