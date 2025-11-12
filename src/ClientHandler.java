@@ -261,30 +261,30 @@ public class ClientHandler implements Runnable {
     // novo candidato
     private String handleRegistarCandidato() throws SQLException, IOException {
         String inputLine;
-        out.print("Nome: ");
+        out.println("Nome: ");
         out.flush();
-        String nome = in.readLine().trim();
+        String nome = in.readLine();
 
-        out.print("Email: ");
+        out.println("Email: ");
         out.flush();
-        String email = in.readLine().trim();
+        String email = in.readLine();
 
-        out.print("Telefone: ");
+        out.println("Telefone: ");
         out.flush();
-        String telefone = in.readLine().trim();
+        String telefone = in.readLine();
 
-        out.print("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
+        out.println("Sexo [MASCULINO,FEMENINO,OUTRO]: ");
         out.flush();
-        String sexoStr = in.readLine().trim();
+        String sexoStr = in.readLine();
         Candidato.Sexo sexo;
         try {
             sexo = Candidato.Sexo.valueOf(sexoStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             return "ERRO|Sexo inválido. Use: MASCULINO, FEMININO, OUTRO.";
         }
-        out.print("Curso: ");
+        out.println("Curso: ");
         out.flush();
-        String curso = in.readLine().trim();
+        String curso = in.readLine();
 
         out.println("=================================");
         out.flush();
