@@ -72,7 +72,7 @@ public class ClientHandler implements Runnable {
         String[] args = Arrays.copyOfRange(parts, 1, parts.length);
 
         try {
-            // 1. Tentar comandos numéricos
+            // 1. Tentar comandos numéricos (Utilizador Final)
             try {
                 int cmdNum = Integer.parseInt(cmd);
                 switch (cmdNum) {
@@ -89,16 +89,26 @@ public class ClientHandler implements Runnable {
                         return "ERRO|Opção de menu não reconhecida: " + cmdNum;
                 }
             } catch (NumberFormatException e) {
-                // Se a primeira parte não for um número, tenta comandos administrativos
+                // 2. Se a primeira parte não for um número, tenta comandos administrativos
                 switch (cmd) {
                     case "REGISTAR_ALOJAMENTO":
-                        // ... (restante dos comandos administrativos existentes) ...
-                    case "APROVAR_ALOJAMENTO":
-                        // Ex: APROVAR_ALOJAMENTO|5
-                        return handleAtualizarEstadoAlojamento(Integer.parseInt(args[0]), EstadoAlojamento.APROVADO);
+                        // Ex: REGISTAR_ALOJAMENTO|Nome X|Lisboa|10
+                        return handleRegistarAlojamento(args);
+
+                    case "ATUALIZAR_ESTADO_ALOJAMENTO":
+                        // NOVO COMANDO ADMINISTRATIVO
+                        // Ex: ATUALIZAR_ESTADO_ALOJAMENTO|5|APROVADO
+                        return handleAtualizarEstadoAlojamento(args);
+
+                    case "ACEITAR_CANDIDATURA":
+                        // NOVO COMANDO ADMINISTRATIVO (Ação principal do sistema)
+                        // Ex: ACEITAR_CANDIDATURA|12
+                        return handleAceitarCandidatura(Integer.parseInt(args[0]));
+
                     case "REGISTAR_CANDIDATO":
                         // Ex: REGISTAR_CANDIDATO|Joana|joana@mail.pt|912345678|FEMININO|Eng
                         return handleRegistarCandidato(args);
+
                     case "SAIR":
                         return "SUCESSO|Desconectando...";
                     default:
@@ -126,7 +136,7 @@ public class ClientHandler implements Runnable {
     }
     // COMANDO 2: Verificar estado da candidatura
     private String handleVerificarEstadoCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
-        // Assume que existe um método findById ou verificarEstado no serviço
+        // Assume que existe um méthod findById ou verificarEstado no serviço
         Optional<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
 
         if (candidaturaOpt.isEmpty()) {
@@ -169,12 +179,39 @@ public class ClientHandler implements Runnable {
         return "SUCESSO|Alojamento ID " + registado.getId() + " registado como " + registado.getEstado();
     }
 
-    private String handleAtualizarEstadoAlojamento(int alojamentoId, EstadoAlojamento estado) throws IllegalArgumentException, SQLException {
-        boolean sucesso = alojamentoService.atualizarEstado(alojamentoId, estado);
+    private String handleAtualizarEstadoAlojamento(String[] args) throws IllegalArgumentException, SQLException {
+        if (args.length < 2) {
+            throw new IllegalArgumentException("Argumentos insuficientes. Use: ID|ESTADO_NOVO.");
+        }
+
+        int alojamentoId = Integer.parseInt(args[0]);
+        EstadoAlojamento novoEstado;
+
+        // 1. Converte a string do estado para o ENUM
+        try {
+            novoEstado = EstadoAlojamento.valueOf(args[1].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Estado de Alojamento inválido: " + args[1] + ". Use um dos seguintes: " + Arrays.toString(EstadoAlojamento.values()));
+        }
+
+        // 2. Chama o serviço
+        boolean sucesso = alojamentoService.atualizarEstado(alojamentoId, novoEstado);
+
         if (sucesso) {
-            return "SUCESSO|Alojamento " + alojamentoId + " atualizado para " + estado.name() + ".";
+            return "SUCESSO|Alojamento " + alojamentoId + " atualizado para " + novoEstado.name() + ".";
         }
         return "ERRO|Falha na atualização do estado do alojamento.";
+    }
+
+    private String handleAceitarCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
+        // Chama o méthod no serviço que contém a lógica de aceitação
+        boolean sucesso = candidaturaService.aceitarCandidatura(candidaturaId);
+
+        if (sucesso) {
+            // Se aceita, o serviço deve garantir que outras candidaturas no mesmo alojamento sejam recusadas/finalizadas.
+            return "SUCESSO|Candidatura ID " + candidaturaId + " aceite com sucesso. Outras candidaturas podem ter sido finalizadas.";
+        }
+        return "ERRO|Falha ao aceitar a candidatura. Verifique o estado atual e se o alojamento está ativo.";
     }
 
     private String handleRegistarCandidato(String[] args) throws IllegalArgumentException, SQLException {

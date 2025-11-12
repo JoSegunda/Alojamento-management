@@ -39,7 +39,7 @@ public class CandidaturaService {
             throw new IllegalArgumentException("Candidato não existe.");
         }
         // O alojamento deve estar aprovado para receber candidaturas
-        if (alojamento.getEstado() != Alojamento.EstadoAlojamento.APROVADO) {
+        if (alojamento.getEstado() != Alojamento.EstadoAlojamento.ATIVO) {
             throw new IllegalArgumentException("O alojamento não está disponível para candidaturas.");
         }
 
