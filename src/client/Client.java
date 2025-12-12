@@ -6,96 +6,155 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Client {
-    private static final String ServerIP = "127.0.0.1";
-    private static final int ServerPort = 12345;
+    private static final String SERVER_IP = "127.0.0.1";
+    private static final int SERVER_PORT = 12345;
+    private static Socket socket;
+    private static PrintWriter out;
+    private static BufferedReader in;
+    private static Scanner scanner = new Scanner(System.in);
+    private static boolean connected = false;
 
     public static void main(String[] args) {
-        System.out.println("Cliente conectando...");
+        System.out.println("🎓 CLIENTE DE ALOJAMENTO ESTUDANTIL");
+        System.out.println("=====================================");
 
-        try (
-                Socket socket = new Socket(ServerIP, ServerPort);
-                Scanner scanner = new Scanner(System.in);
-                PrintWriter out = new PrintWriter(
-                        new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))
-        ) {
-            System.out.println("Conectado ao servidor em " + ServerIP + ":" + ServerPort);
+        if (!connectToServer()) {
+            return;
+        }
 
-            String userInput;
-            String line;
+        try {
+            // Identificar como usuário normal
+            out.println("USER");
+            out.flush();
 
-            // 🔹 Lê o menu inicial
-            while ((line = in.readLine()) != null && !line.isEmpty()) {
-                System.out.println(line);
-            }
+            // Receber menu inicial
+            System.out.println("\n📋 MENU PRINCIPAL:");
+            readServerResponse();
 
-            while (true) {
-                System.out.print("Você: ");
-                userInput = scanner.nextLine();
+            // Loop principal de interação
+            boolean exit = false;
+            while (!exit && connected) {
+                System.out.print("\n📝 Escolha uma opção (1-4): ");
+                String option = scanner.nextLine().trim();
 
-                out.println(userInput);
+                switch (option) {
+                    case "1":
+                        handleCandidatura();
+                        break;
+                    case "2":
+                        handleVerificarCandidatura();
+                        break;
+                    case "3":
+                        listarAlojamentos();
+                        break;
+                    case "4":
+                        out.println("SAIR");
+                        out.flush();
+                        exit = true;
+                        System.out.println("👋 A sair do sistema...");
+                        break;
+                    default:
+                        System.out.println("⚠️ Opção inválida! Tente novamente.");
+                }
 
-                // 🔹 Se for o comando 1 (registo), modo interativo especial
-                if ("1".equals(userInput.trim())) {
-                    System.out.println("🌀 Modo de registo ativado...");
-
-                    // 🔥 LIMPAR O BUFFER antes de começar o modo interativo
-                    clearInputStream(in);
-
-                    // Processar fluxo interativo
-                    while ((line = in.readLine()) != null) {
-                        // Se for linha vazia, termina o fluxo
-                        if (line.trim().isEmpty()) {
-                            break;
-                        }
-                        // Se for um ERRO, apenas mostrar
-                        if (line.startsWith("ERRO|")) {
-                            System.out.println("❌ " + line.substring(5));
-                            continue;
-                        }
-
-                        // Se for SUCESSO, mostrar e terminar
-                        if (line.startsWith("SUCESSO|")) {
-                            System.out.println("✅ " + line.substring(8));
-                            break;
-                        }
-
-                        // Se for um prompt (termina com ":"), responder
-                        if (line.endsWith(":") || line.contains(":")) {
-                            System.out.println("Servidor: " + line);
-                            System.out.print("Sua resposta: ");
-                            String resposta = scanner.nextLine();
-                            out.println(resposta);
-                        } else {
-                            // Se não for prompt, apenas mostrar a mensagem
-                            System.out.println("Servidor: " + line);
-                        }
-                    }
-                } else {
-                    //Comportamento normal para outros comandos
-                    while ((line = in.readLine()) != null && !line.trim().isEmpty()) {
-                        System.out.println("Servidor: " + line);
-                    }
+                if (!exit) {
+                    readServerResponse();
                 }
             }
-
         } catch (Exception e) {
-            System.err.println("Erro de comunicação: " + e.getMessage());
+            System.err.println("❌ Erro durante a sessão: " + e.getMessage());
         } finally {
-            System.out.println("Conexão encerrada.");
+            disconnect();
         }
     }
 
-    //  LIMPAR O BUFFER DE ENTRADA
-    private static void clearInputStream(BufferedReader in) {
+    private static boolean connectToServer() {
         try {
-            // Lê todos os dados disponíveis sem bloquear
-            while (in.ready()) {
-                in.readLine();
-            }
+            socket = new Socket(SERVER_IP, SERVER_PORT);
+            out = new PrintWriter(
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            connected = true;
+            System.out.println("✅ Conectado ao servidor!");
+            return true;
         } catch (IOException e) {
-            // Ignora erros de limpeza
+            System.err.println("❌ Não foi possível conectar ao servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void readServerResponse() throws IOException {
+        String line;
+        while ((line = in.readLine()) != null) {
+            if (line.isEmpty()) break;
+
+            if (line.startsWith("ERRO")) {
+                System.err.println("❌ " + line.replaceFirst("ERRO[|_]*", ""));
+            } else if (line.startsWith("SUCESSO")) {
+                System.out.println("✅ " + line.replaceFirst("SUCESSO[|_]*", ""));
+            } else {
+                System.out.println(line);
+            }
+        }
+    }
+
+    private static void handleCandidatura() {
+        System.out.println("\n📄 NOVA CANDIDATURA");
+        System.out.println("-------------------");
+
+        try {
+            // O servidor irá guiar passo a passo
+            out.println("1");
+            out.flush();
+
+            // Aguardar instruções do servidor
+            readServerResponse();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao processar candidatura: " + e.getMessage());
+        }
+    }
+
+    private static void handleVerificarCandidatura() {
+        System.out.println("\n🔍 VERIFICAR CANDIDATURA");
+        System.out.println("-------------------------");
+
+        try {
+            System.out.print("Digite o ID da candidatura: ");
+            String id = scanner.nextLine().trim();
+
+            out.println("2|" + id);
+            out.flush();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao verificar candidatura: " + e.getMessage());
+        }
+    }
+
+    private static void listarAlojamentos() {
+        System.out.println("\n🏠 ALOJAMENTOS DISPONÍVEIS");
+        System.out.println("-------------------------");
+
+        try {
+            out.println("3");
+            out.flush();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao listar alojamentos: " + e.getMessage());
+        }
+    }
+
+    private static void disconnect() {
+        try {
+            if (out != null) out.close();
+            if (in != null) in.close();
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            scanner.close();
+            System.out.println("🔒 Conexão encerrada.");
+        } catch (IOException e) {
+            System.err.println("⚠️ Erro ao fechar conexão: " + e.getMessage());
         }
     }
 }

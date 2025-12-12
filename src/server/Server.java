@@ -15,7 +15,7 @@ public class Server {
 
     public static void main(String[] args) {
         System.out.println("╔══════════════════════════════════════════════════╗");
-        System.out.println("║   SERVIDOR DE ALOJAMENTO ESTUDANTIL - ONLINE    ║");
+        System.out.println("║   SERVIDOR DE ALOJAMENTO ESTUDANTIL - ONLINE     ║");
         System.out.println("╚══════════════════════════════════════════════════╝");
         System.out.println("🔧 Inicializando serviços...");
 
