@@ -26,26 +26,26 @@ public class AdminClient {
 
             System.out.println("✅ Conectado como administrador!");
 
-            // Loop principal
             boolean running = true;
             while (running) {
-                // Ler resposta do servidor
-                String line;
-                while ((line = in.readLine()) != null) {
-                    if (line.equals("END")) break;
-                    System.out.println(line);
+                // Ler e exibir resposta do servidor
+                String response = readServerResponse();
+                if (response.contains("Até logo") || response.contains("SAIR")) {
+                    running = false;
+                    continue;
                 }
 
-                // Ler comando do admin
+                // Pedir comando do admin
                 System.out.print("\nAdmin> ");
                 String input = scanner.nextLine().trim();
 
                 if (input.equalsIgnoreCase("SAIR")) {
-                    running = false;
+                    out.println("SAIR");
+                    out.flush();
+                } else {
+                    out.println(input);
+                    out.flush();
                 }
-
-                out.println(input);
-                out.flush();
             }
 
         } catch (IOException e) {
@@ -54,6 +54,19 @@ public class AdminClient {
             disconnect();
             scanner.close();
         }
+    }
+
+    private static String readServerResponse() throws IOException {
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            if (line.equals("END")) break;
+            response.append(line).append("\n");
+        }
+
+        System.out.print(response.toString());
+        return response.toString();
     }
 
     private static void connectToServer() throws IOException {

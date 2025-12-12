@@ -19,28 +19,33 @@ public class Client {
 
         try {
             connectToServer();
+
+            // Enviar identificação como usuário normal
+            out.println("USER");
+            out.flush();
+
             System.out.println("✅ Conectado ao servidor!");
 
-            // Loop principal
             boolean running = true;
             while (running) {
-                // Ler resposta do servidor (até encontrar "END")
-                String line;
-                while ((line = in.readLine()) != null) {
-                    if (line.equals("END")) break;
-                    System.out.println(line);
+                // Ler e exibir resposta do servidor
+                String response = readServerResponse();
+                if (response.contains("Até logo") || response.contains("SAIR")) {
+                    running = false;
+                    continue;
                 }
 
-                // Ler entrada do usuário
+                // Pedir entrada do usuário
                 System.out.print("\n> ");
                 String input = scanner.nextLine().trim();
 
                 if (input.equalsIgnoreCase("4") || input.equalsIgnoreCase("SAIR")) {
-                    running = false;
+                    out.println("SAIR");
+                    out.flush();
+                } else {
+                    out.println(input);
+                    out.flush();
                 }
-
-                out.println(input);
-                out.flush();
             }
 
         } catch (IOException e) {
@@ -49,6 +54,19 @@ public class Client {
             disconnect();
             scanner.close();
         }
+    }
+
+    private static String readServerResponse() throws IOException {
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            if (line.equals("END")) break;
+            response.append(line).append("\n");
+        }
+
+        System.out.print(response.toString());
+        return response.toString();
     }
 
     private static void connectToServer() throws IOException {

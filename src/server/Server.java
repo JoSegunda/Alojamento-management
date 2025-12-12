@@ -15,8 +15,9 @@ public class Server {
 
     public static void main(String[] args) {
         System.out.println("╔══════════════════════════════════════════════════╗");
-        System.out.println("║   SERVIDOR DE ALOJAMENTO ESTUDANTIL - ONLINE     ║");
+        System.out.println("║   SERVIDOR DE ALOJAMENTO ESTUDANTIL - ONLINE    ║");
         System.out.println("╚══════════════════════════════════════════════════╝");
+
         System.out.println("🔧 Inicializando serviços...");
 
         try {
@@ -27,13 +28,10 @@ public class Server {
 
             // Inicializar serviços
             AlojamentoService alojamentoService = new AlojamentoService(alojamentoRepo);
-            CandidatoService candidatoService = new CandidatoService(candidatoRepo, null);
             CandidaturaService candidaturaService = new CandidaturaService(
                     candidaturaRepo, alojamentoRepo, candidatoRepo
             );
-
-            // Atualizar referência circular
-            candidatoService = new CandidatoService(candidatoRepo, candidaturaService);
+            CandidatoService candidatoService = new CandidatoService(candidatoRepo, candidaturaService);
 
             System.out.println("✅ Serviços inicializados com sucesso!");
             System.out.println("🌐 Aguardando conexões na porta " + PORT + "...");
@@ -42,22 +40,17 @@ public class Server {
 
             try (ServerSocket serverSocket = new ServerSocket(PORT)) {
                 while (running) {
-                    try {
-                        Socket clientSocket = serverSocket.accept();
-                        System.out.println("\n🔗 Nova conexão: " +
-                                clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
+                    Socket clientSocket = serverSocket.accept();
+                    System.out.println("\n🔗 Nova conexão: " +
+                            clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
 
-                        ClientHandler handler = new ClientHandler(
-                                clientSocket, alojamentoService, candidatoService, candidaturaService
-                        );
-                        threadPool.execute(handler);
-                    } catch (IOException e) {
-                        if (running) {
-                            System.err.println("⚠️ Erro ao aceitar conexão: " + e.getMessage());
-                        }
-                    }
+                    ClientHandler handler = new ClientHandler(
+                            clientSocket, alojamentoService, candidatoService, candidaturaService
+                    );
+                    threadPool.execute(handler);
                 }
             }
+
             threadPool.shutdown();
         } catch (Exception e) {
             System.err.println("❌ Erro fatal no servidor: " + e.getMessage());

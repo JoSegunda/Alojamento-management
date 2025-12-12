@@ -4,6 +4,9 @@ import model.Alojamento;
 import model.Alojamento.EstadoAlojamento;
 import model.Candidato;
 import model.Candidatura;
+import repository.AlojamentoRepository;
+import repository.CandidatoRepository;
+import repository.CandidaturaRepository;
 import service.AlojamentoService;
 import service.CandidatoService;
 import service.CandidaturaService;
@@ -20,13 +23,13 @@ public class ClientHandler implements Runnable {
     private final BufferedReader in;
     private final int clientPort;
 
-    // Serviços
+    // Serviços e Repositórios
     private final AlojamentoService alojamentoService;
     private final CandidatoService candidatoService;
     private final CandidaturaService candidaturaService;
+    private final AlojamentoRepository alojamentoRepository;
 
     private boolean isAdmin = false;
-    private boolean running = true;
 
     public ClientHandler(Socket socket,
                          AlojamentoService alojamentoService,
@@ -38,6 +41,9 @@ public class ClientHandler implements Runnable {
         this.candidatoService = candidatoService;
         this.candidaturaService = candidaturaService;
 
+        // Inicializar repositório para métodos adicionais
+        this.alojamentoRepository = new AlojamentoRepository();
+
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
     }
@@ -47,307 +53,300 @@ public class ClientHandler implements Runnable {
         System.out.println("[HANDLER] Cliente conectado na porta " + clientPort);
 
         try {
-            // Verificar tipo de cliente
-            String firstLine = in.readLine();
-            if (firstLine != null && firstLine.trim().equalsIgnoreCase("ADMIN")) {
+            // Identificar tipo de cliente
+            String clientType = in.readLine();
+            if (clientType != null && clientType.trim().equalsIgnoreCase("ADMIN")) {
                 isAdmin = true;
-                showAdminMenu();
+                sendMessage(getAdminMenu());
             } else {
-                showUserMenu();
+                sendMessage(getUserMenu());
             }
 
             // Processar comandos
-            processClientCommands();
+            processCommands();
 
         } catch (IOException e) {
-            System.err.println("Cliente " + clientPort + " desconectado: " + e.getMessage());
+            System.out.println("[HANDLER] Cliente " + clientPort + " desconectado.");
         } finally {
             closeResources();
         }
     }
 
-    private void processClientCommands() throws IOException {
-        String inputLine;
+    private void processCommands() throws IOException {
+        String input;
+        while ((input = in.readLine()) != null) {
+            input = input.trim();
 
-        while (running && (inputLine = in.readLine()) != null) {
-            inputLine = inputLine.trim();
-
-            if (inputLine.equalsIgnoreCase("SAIR") || inputLine.equalsIgnoreCase("4")) {
+            if (input.equalsIgnoreCase("SAIR") || input.equals("4")) {
                 sendMessage("Até logo! 👋");
                 break;
             }
 
             String response = isAdmin ?
-                    processAdminCommand(inputLine) :
-                    processUserCommand(inputLine);
+                    processAdminInput(input) :
+                    processUserInput(input);
 
             sendMessage(response);
+
+            // Se não for admin, mostrar menu novamente após cada comando
+            if (!isAdmin && !response.contains("ERRO")) {
+                sendMessage(getUserMenu());
+            } else if (isAdmin) {
+                sendMessage(getAdminMenu());
+            }
         }
     }
 
-    // ========== COMANDOS DE ADMIN ==========
-    private String processAdminCommand(String command) {
-        String[] parts = command.split("\\|");
-        String cmd = parts[0].trim().toUpperCase();
+    // ========== PROCESSAMENTO ADMIN ==========
+    private String processAdminInput(String input) {
+        System.out.println("[ADMIN " + clientPort + "] Comando: " + input);
+
+        String[] parts = input.split("\\|");
+        String command = parts[0].trim();
 
         try {
-            return switch (cmd) {
-                case "1", "REGISTAR_ALOJAMENTO" -> handleRegistarAlojamento(parts);
-                case "2", "ATUALIZAR_ESTADO_ALOJAMENTO" -> handleAtualizarEstadoAlojamento(parts);
-                case "3", "ACEITAR_CANDIDATURA" -> handleAceitarCandidatura(parts);
-                case "4", "LISTAR_CANDIDATURAS" -> handleListarCandidaturas();
-                case "5", "LISTAR_ALOJAMENTOS" -> handleListarTodosAlojamentos();
-                default -> "ERRO|Comando não reconhecido";
-            };
+            switch (command) {
+                case "1":
+                case "REGISTAR_ALOJAMENTO":
+                    if (parts.length < 4) {
+                        return "ERRO|Formato: 1|Nome|Cidade|Capacidade\nExemplo: 1|Residência A|Lisboa|50";
+                    }
+                    return registarAlojamento(parts[1], parts[2], parts[3]);
+
+                case "2":
+                case "ATUALIZAR_ESTADO_ALOJAMENTO":
+                    if (parts.length < 3) {
+                        return "ERRO|Formato: 2|ID|ESTADO\nExemplo: 2|1|ATIVO\nEstados: PENDENTE, EM_OBRAS, ATIVO, SUSPENSO";
+                    }
+                    return atualizarEstadoAlojamento(parts[1], parts[2]);
+
+                case "3":
+                case "ACEITAR_CANDIDATURA":
+                    if (parts.length < 2) {
+                        return "ERRO|Formato: 3|ID_CANDIDATURA\nExemplo: 3|5";
+                    }
+                    return aceitarCandidatura(parts[1]);
+
+                case "4":
+                case "LISTAR_CANDIDATURAS":
+                    return "SUCESSO|Lista de candidaturas:\n(Esta funcionalidade será implementada)";
+
+                case "5":
+                case "LISTAR_ALOJAMENTOS":
+                    return listarTodosAlojamentos();
+
+                default:
+                    return "ERRO|Comando não reconhecido. Use os números 1-5 ou os comandos completos.";
+            }
         } catch (Exception e) {
             return "ERRO|" + e.getMessage();
         }
     }
 
-    private String handleRegistarAlojamento(String[] parts) throws SQLException {
-        if (parts.length < 4) {
-            return "ERRO|Uso: 1|Nome|Cidade|Capacidade ou REGISTAR_ALOJAMENTO|Nome|Cidade|Capacidade";
-        }
-
-        String nome = parts[1].trim();
-        String cidade = parts[2].trim();
-        int capacidade;
-
+    private String registarAlojamento(String nome, String cidade, String capacidadeStr) {
         try {
-            capacidade = Integer.parseInt(parts[3].trim());
+            int capacidade = Integer.parseInt(capacidadeStr);
+            Alojamento alojamento = new Alojamento(nome, cidade, capacidade);
+            Alojamento registado = alojamentoService.registarAlojamento(alojamento);
+            return "SUCESSO|Alojamento criado com sucesso!\nID: " + registado.getId() +
+                    " | Nome: " + registado.getNome() +
+                    " | Estado: " + registado.getEstado();
         } catch (NumberFormatException e) {
-            return "ERRO|Capacidade deve ser um número";
+            return "ERRO|Capacidade deve ser um número inteiro.";
+        } catch (SQLException e) {
+            return "ERRO|Erro na base de dados: " + e.getMessage();
+        } catch (Exception e) {
+            return "ERRO|" + e.getMessage();
         }
-
-        Alojamento novo = new Alojamento(nome, cidade, capacidade);
-        Alojamento registado = alojamentoService.registarAlojamento(novo);
-
-        return "SUCESSO|Alojamento ID " + registado.getId() +
-                " registado como " + registado.getEstado();
     }
 
-    private String handleAtualizarEstadoAlojamento(String[] parts) throws SQLException {
-        if (parts.length < 3) {
-            return "ERRO|Uso: 2|ID|ESTADO ou ATUALIZAR_ESTADO_ALOJAMENTO|ID|ESTADO";
-        }
-
-        int id;
-        EstadoAlojamento novoEstado;
-
+    private String atualizarEstadoAlojamento(String idStr, String estadoStr) {
         try {
-            id = Integer.parseInt(parts[1].trim());
-            novoEstado = EstadoAlojamento.valueOf(parts[2].trim().toUpperCase());
+            int id = Integer.parseInt(idStr);
+            EstadoAlojamento estado = EstadoAlojamento.valueOf(estadoStr.toUpperCase());
+
+            boolean sucesso = alojamentoService.atualizarEstado(id, estado);
+            if (sucesso) {
+                return "SUCESSO|Estado do alojamento " + id + " atualizado para: " + estado;
+            } else {
+                return "ERRO|Não foi possível atualizar o alojamento.";
+            }
         } catch (NumberFormatException e) {
-            return "ERRO|ID deve ser um número";
+            return "ERRO|ID deve ser um número.";
         } catch (IllegalArgumentException e) {
             return "ERRO|Estado inválido. Use: PENDENTE, EM_OBRAS, ATIVO, SUSPENSO";
+        } catch (SQLException e) {
+            return "ERRO|Erro na base de dados: " + e.getMessage();
         }
-
-        boolean sucesso = alojamentoService.atualizarEstado(id, novoEstado);
-        return sucesso ?
-                "SUCESSO|Alojamento " + id + " atualizado para " + novoEstado :
-                "ERRO|Falha na atualização";
     }
 
-    private String handleAceitarCandidatura(String[] parts) throws SQLException {
-        if (parts.length < 2) {
-            return "ERRO|Uso: 3|ID ou ACEITAR_CANDIDATURA|ID";
-        }
-
-        int candidaturaId;
+    private String aceitarCandidatura(String idStr) {
         try {
-            candidaturaId = Integer.parseInt(parts[1].trim());
+            int candidaturaId = Integer.parseInt(idStr);
+            boolean sucesso = candidaturaService.aceitarCandidatura(candidaturaId);
+
+            if (sucesso) {
+                return "SUCESSO|Candidatura " + candidaturaId + " aceite com sucesso!";
+            } else {
+                return "ERRO|Não foi possível aceitar a candidatura.\nVerifique se existe e está no estado correto.";
+            }
         } catch (NumberFormatException e) {
-            return "ERRO|ID deve ser um número";
-        }
-
-        boolean sucesso = candidaturaService.aceitarCandidatura(candidaturaId);
-        return sucesso ?
-                "SUCESSO|Candidatura " + candidaturaId + " aceite" :
-                "ERRO|Não foi possível aceitar a candidatura";
-    }
-
-    private String handleListarCandidaturas() throws SQLException {
-        // Implementação simplificada - listar apenas as pendentes
-        return "SUCESSO|Funcionalidade em desenvolvimento. Use o AdminClient para mais opções.";
-    }
-
-    private String handleListarTodosAlojamentos() throws SQLException {
-        // Este método precisaria ser adicionado ao AlojamentoService
-        return "SUCESSO|Funcionalidade em desenvolvimento. Use o AdminClient para mais opções.";
-    }
-
-    // ========== COMANDOS DE USUÁRIO ==========
-    private String processUserCommand(String command) {
-        try {
-            int option = Integer.parseInt(command);
-
-            return switch (option) {
-                case 1 -> handleNovaCandidatura();
-                case 2 -> handleVerificarCandidatura();
-                case 3 -> handleListarAlojamentosDisponiveis();
-                default -> "ERRO|Opção inválida. Use 1, 2, 3 ou 4 para sair.";
-            };
-        } catch (NumberFormatException e) {
-            return "ERRO|Digite um número (1-4)";
+            return "ERRO|ID deve ser um número.";
+        } catch (SQLException e) {
+            return "ERRO|Erro na base de dados: " + e.getMessage();
         } catch (Exception e) {
             return "ERRO|" + e.getMessage();
         }
     }
 
-    private String handleNovaCandidatura() {
+    private String listarTodosAlojamentos() {
         try {
-            // Coletar dados do candidato
-            Candidato candidato = coletarDadosCandidato();
+            List<Alojamento> alojamentos = alojamentoRepository.findAll();
 
-            // Listar alojamentos disponíveis
-            String alojamentos = handleListarAlojamentosDisponiveis();
-            sendMessage(alojamentos);
-
-            // Selecionar alojamento
-            sendMessage("Digite o ID do alojamento desejado:");
-            String resposta = in.readLine();
-
-            if (resposta == null) return "ERRO|Conexão perdida";
-
-            int alojamentoId;
-            try {
-                alojamentoId = Integer.parseInt(resposta.trim());
-            } catch (NumberFormatException e) {
-                return "ERRO|ID inválido";
+            if (alojamentos.isEmpty()) {
+                return "INFO|Nenhum alojamento registado.";
             }
 
-            // Registrar candidato e candidatura
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== TODOS OS ALOJAMENTOS ===\n");
+            for (Alojamento a : alojamentos) {
+                sb.append(String.format("ID: %2d | %-20s | %-15s | Cap: %3d | Estado: %-10s\n",
+                        a.getId(), a.getNome(), a.getCidade(), a.getCapacidade(), a.getEstado()));
+            }
+            return sb.toString();
+        } catch (SQLException e) {
+            return "ERRO|Erro ao listar alojamentos: " + e.getMessage();
+        }
+    }
+
+    // ========== PROCESSAMENTO USUÁRIO ==========
+    private String processUserInput(String input) {
+        System.out.println("[USER " + clientPort + "] Opção: " + input);
+
+        try {
+            int opcao = Integer.parseInt(input);
+
+            switch (opcao) {
+                case 1:
+                    return iniciarCandidatura();
+                case 2:
+                    return "SUCESSO|Para verificar o estado da sua candidatura, contacte a administração.";
+                case 3:
+                    return listarAlojamentosDisponiveis();
+                default:
+                    return "ERRO|Opção inválida. Use 1, 2, 3 ou 4 para sair.";
+            }
+        } catch (NumberFormatException e) {
+            return "ERRO|Digite um número (1-4).";
+        }
+    }
+
+    private String iniciarCandidatura() {
+        try {
+            // Coletar dados básicos primeiro
+            sendMessage("=== NOVA CANDIDATURA ===\nDigite seu nome completo:");
+            String nome = in.readLine();
+
+            sendMessage("Digite seu email:");
+            String email = in.readLine();
+
+            sendMessage("Digite seu telefone:");
+            String telefone = in.readLine();
+
+            sendMessage("Digite seu curso:");
+            String curso = in.readLine();
+
+            // Mostrar alojamentos disponíveis
+            String alojamentos = listarAlojamentosDisponiveis();
+            sendMessage(alojamentos + "\nDigite o ID do alojamento desejado:");
+
+            String alojamentoIdStr = in.readLine();
+            int alojamentoId = Integer.parseInt(alojamentoIdStr);
+
+            // Criar candidato
+            Candidato candidato = new Candidato(nome, email, telefone,
+                    Candidato.Sexo.OUTRO, curso); // Sexo padrão
+
             Candidato registado = candidatoService.registarCandidato(candidato, alojamentoId);
 
-            return "SUCESSO|Candidato " + registado.getNome() +
-                    " (ID: " + registado.getId() + ") registado com sucesso!";
+            return "SUCESSO|Candidatura submetida com sucesso!\n" +
+                    "Seu ID de candidato: " + registado.getId() + "\n" +
+                    "Aguarde contato da administração.";
 
         } catch (IOException e) {
             return "ERRO|Erro de comunicação: " + e.getMessage();
-        } catch (SQLException e) {
-            return "ERRO|Erro no banco de dados: " + e.getMessage();
-        }
-    }
-
-    private Candidato coletarDadosCandidato() throws IOException {
-        sendMessage("=== NOVA CANDIDATURA ===");
-
-        String nome = readInput("Nome completo: ");
-        String email = readInput("Email: ");
-        String telefone = readInput("Telefone: ");
-
-        Candidato.Sexo sexo = null;
-        while (sexo == null) {
-            String sexoStr = readInput("Sexo (MASCULINO/FEMININO/OUTRO): ").toUpperCase();
-            try {
-                sexo = Candidato.Sexo.valueOf(sexoStr);
-            } catch (IllegalArgumentException e) {
-                sendMessage("ERRO|Opção inválida. Tente novamente.");
-            }
-        }
-
-        String curso = readInput("Curso: ");
-
-        return new Candidato(nome, email, telefone, sexo, curso);
-    }
-
-    private String handleVerificarCandidatura() throws IOException {
-        sendMessage("Digite o ID da sua candidatura:");
-        String resposta = in.readLine();
-
-        if (resposta == null) return "ERRO|Conexão perdida";
-
-        try {
-            int candidaturaId = Integer.parseInt(resposta.trim());
-            Optional<Candidatura> candidaturas = candidaturaService.findById(candidaturaId);
-
-            if (candidaturas.isEmpty()) {
-                return "ERRO|Candidatura não encontrada";
-            }
-
-            Candidatura candidatura = candidaturas.get();
-            StringBuilder sb = new StringBuilder();
-            sb.append("=== ESTADO DA CANDIDATURA ===\n");
-            sb.append("ID: ").append(candidatura.getId()).append("\n");
-            sb.append("Data: ").append(candidatura.getDataCandidatura()).append("\n");
-            sb.append("Estado: ").append(candidatura.getEstado()).append("\n");
-
-            // Informações adicionais
-            Optional<Candidato> candidato = candidatoService.findById(candidatura.getCandidatoId());
-            candidato.ifPresent(c -> sb.append("Candidato: ").append(c.getNome()).append("\n"));
-
-            Optional<Alojamento> alojamento = alojamentoService.findById(candidatura.getAlojamentoId());
-            alojamento.ifPresent(a -> sb.append("Alojamento: ").append(a.getNome()).append("\n"));
-
-            return sb.toString();
-
         } catch (NumberFormatException e) {
-            return "ERRO|ID inválido";
+            return "ERRO|ID do alojamento inválido.";
         } catch (SQLException e) {
-            return "ERRO|Erro ao consultar candidatura: " + e.getMessage();
+            return "ERRO|Erro na base de dados: " + e.getMessage();
+        } catch (Exception e) {
+            return "ERRO|" + e.getMessage();
         }
     }
 
-    private String handleListarAlojamentosDisponiveis() throws SQLException {
-        List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
+    private String listarAlojamentosDisponiveis() {
+        try {
+            List<Alojamento> disponiveis = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
-        if (disponiveis.isEmpty()) {
-            return "Nenhum alojamento disponível no momento.";
-        }
+            if (disponiveis.isEmpty()) {
+                return "INFO|Nenhum alojamento disponível no momento.";
+            }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== ALOJAMENTOS DISPONÍVEIS ===\n");
-        for (Alojamento a : disponiveis) {
-            sb.append(String.format("ID: %d | %s - %s | Capacidade: %d\n",
-                    a.getId(), a.getNome(), a.getCidade(), a.getCapacidade()));
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== ALOJAMENTOS DISPONÍVEIS ===\n");
+            for (Alojamento a : disponiveis) {
+                sb.append(String.format("ID: %2d | %-20s | %-15s | Vagas: %d\n",
+                        a.getId(), a.getNome(), a.getCidade(), a.getCapacidade()));
+            }
+            return sb.toString();
+        } catch (SQLException e) {
+            return "ERRO|Erro ao carregar alojamentos: " + e.getMessage();
         }
-        return sb.toString();
     }
 
     // ========== MÉTODOS AUXILIARES ==========
-    private void showAdminMenu() {
-        String menu = """
+    private String getAdminMenu() {
+        return """
             ╔══════════════════════════════════════════════════╗
             ║             PAINEL ADMINISTRATIVO                ║
             ╚══════════════════════════════════════════════════╝
+            
             COMANDOS:
-            1|Nome|Cidade|Capacidade  - Registar alojamento
-            2|ID|ESTADO               - Atualizar estado
+            1|Nome|Cidade|Capacidade  - Registar novo alojamento
+            2|ID|ESTADO               - Atualizar estado do alojamento
             3|ID                      - Aceitar candidatura
-            4                         - Listar candidaturas
-            5                         - Listar alojamentos
+            4                         - Listar candidaturas pendentes
+            5                         - Listar todos alojamentos
             SAIR                      - Encerrar sessão
+            
+            Exemplos:
+            1|Residência X|Porto|100
+            2|5|ATIVO
+            3|12
+            
             ══════════════════════════════════════════════════
             """;
-        sendMessage(menu);
     }
 
-    private void showUserMenu() {
-        String menu = """
+    private String getUserMenu() {
+        return """
             ╔══════════════════════════════════════════════════╗
             ║       SISTEMA DE ALOJAMENTO ESTUDANTIL           ║
             ╚══════════════════════════════════════════════════╝
+            
             OPÇÕES:
             1 - Candidatar-se a alojamento
             2 - Verificar estado da candidatura
             3 - Listar alojamentos disponíveis
             4 - Sair do sistema
+            
             ══════════════════════════════════════════════════
-            Digite o número da opção desejada:
             """;
-        sendMessage(menu);
-    }
-
-    private String readInput(String prompt) throws IOException {
-        sendMessage(prompt);
-        String input = in.readLine();
-        return input != null ? input.trim() : "";
     }
 
     private void sendMessage(String message) {
         out.println(message);
-        out.println("END"); // Marcador de fim de mensagem
+        out.println("END");
         out.flush();
     }
 
@@ -357,8 +356,8 @@ public class ClientHandler implements Runnable {
             if (in != null) in.close();
             if (clientSocket != null && !clientSocket.isClosed()) {
                 clientSocket.close();
-                System.out.println("[HANDLER " + clientPort + "] Conexão encerrada.");
             }
+            System.out.println("[HANDLER " + clientPort + "] Conexão encerrada.");
         } catch (IOException e) {
             System.err.println("Erro ao fechar recursos: " + e.getMessage());
         }
