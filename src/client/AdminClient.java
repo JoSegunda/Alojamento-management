@@ -28,23 +28,36 @@ public class AdminClient {
 
             boolean running = true;
             while (running) {
-                // Ler e exibir resposta do servidor
-                String response = readServerResponse();
-                if (response == null || response.contains("Até logo")) {
-                    running = false;
-                    continue;
-                }
+                try {
+                    // Ler resposta do servidor
+                    String response = readServerResponse();
 
-                // Pedir comando do admin
-                System.out.print("\nAdmin> ");
-                String input = scanner.nextLine().trim();
+                    if (response == null) {
+                        System.out.println("❌ Conexão com o servidor perdida.");
+                        break;
+                    }
 
-                if (input.equalsIgnoreCase("SAIR")) {
-                    out.println("SAIR");
-                    out.flush();
-                } else {
-                    out.println(input);
-                    out.flush();
+                    // Mostrar resposta
+                    if (!response.isEmpty()) {
+                        System.out.println(response);
+                    }
+
+                    // Pedir comando do admin
+                    System.out.print("\nAdmin> ");
+                    String input = scanner.nextLine().trim();
+
+                    if (input.equalsIgnoreCase("SAIR")) {
+                        out.println("SAIR");
+                        out.flush();
+                        running = false;
+                    } else if (!input.isEmpty()) {
+                        out.println(input);
+                        out.flush();
+                    }
+
+                } catch (IOException e) {
+                    System.out.println("❌ Erro de comunicação: " + e.getMessage());
+                    break;
                 }
             }
 
@@ -53,24 +66,29 @@ public class AdminClient {
         } finally {
             disconnect();
             scanner.close();
+            System.out.println("👋 Sessão admin encerrada.");
         }
     }
 
     private static String readServerResponse() throws IOException {
         StringBuilder response = new StringBuilder();
-        String line;
+        String line = "";
+        boolean reading = true;
 
-        while ((line = in.readLine()) != null) {
-            if (line.equals("END")) break;
-            response.append(line).append("\n");
+        while (reading && (line = in.readLine()) != null) {
+            if (line.equals("END")) {
+                reading = false;
+            } else {
+                response.append(line).append("\n");
+            }
         }
 
+        // Se a conexão foi fechada
         if (line == null && response.length() == 0) {
             return null;
         }
 
-        System.out.print(response.toString());
-        return response.toString();
+        return response.toString().trim();
     }
 
     private static void connectToServer() throws IOException {
@@ -85,8 +103,9 @@ public class AdminClient {
         try {
             if (out != null) out.close();
             if (in != null) in.close();
-            if (socket != null) socket.close();
-            System.out.println("🔒 Conexão admin encerrada.");
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException e) {
             System.err.println("⚠️ Erro ao fechar conexão: " + e.getMessage());
         }

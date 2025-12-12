@@ -7,7 +7,7 @@ public class Candidatura {
     private int alojamentoId; // Chave estrangeira, referência a tabela alojamento
     private int candidatoId; // Chave estrangeira, referência a tabela candidato
     private LocalDate dataCandidatura;
-    public enum EstadoCandidatura { SUBMETIDA, EM_ANALISE, ACEITE, REJEITADA, FINALIZADA }
+    public enum EstadoCandidatura { SUBMETIDA, EM_ANALISE, ACEITE, REJEITADA, PENDENTE }
     private EstadoCandidatura estado;
 
     //Construtor essencial
@@ -25,6 +25,11 @@ public class Candidatura {
         this.candidatoId = candidatoId;
         this.dataCandidatura = dataCandidatura;
         this.estado = estado;
+    }
+
+    public boolean isAtiva() {
+        return this.estado == EstadoCandidatura.SUBMETIDA ||
+                this.estado == EstadoCandidatura.EM_ANALISE;
     }
 
     //Getters e Setters
@@ -47,20 +52,15 @@ public class Candidatura {
     public void colocarEmAnalise() {
         this.estado = EstadoCandidatura.EM_ANALISE;
     }
+
     public void aceitar() {
         this.estado = EstadoCandidatura.ACEITE;
     }
+
     public void rejeitar() {
         this.estado = EstadoCandidatura.REJEITADA;
     }
-    public void finalizar() {
-        this.estado = EstadoCandidatura.FINALIZADA;
-    }
-    // verificar se a candidatura está ativa
-    public boolean isAtiva() {
-        return this.estado == EstadoCandidatura.SUBMETIDA ||
-                this.estado == EstadoCandidatura.EM_ANALISE;
-    }
+
 
     @Override
     public String toString(){

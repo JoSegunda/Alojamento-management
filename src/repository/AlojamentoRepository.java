@@ -75,7 +75,7 @@ public class AlojamentoRepository {
     // M que nos permite encontrar todos candidatos
     public List<Alojamento> findAll() throws SQLException {
         List<Alojamento> lista = new ArrayList<>();
-        String SQL = "SELECT * FROM alojamento ORDER BY id";
+        String SQL = "SELECT * FROM alojamento ORDER BY estado, id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQL);

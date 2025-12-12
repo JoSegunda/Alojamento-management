@@ -48,7 +48,7 @@ public class CandidaturaService {
         return candidaturaRepository.save(novaCandidatura);
     }
 
-    // Método para aceitar candidatura
+    // Méto do para aceitar candidatura
     public boolean aceitarCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
         Optional<Candidatura> candidaturaOpt = candidaturaRepository.findById(candidaturaId);
 
@@ -75,6 +75,27 @@ public class CandidaturaService {
         }
 
         return candidaturaRepository.updateEstado(candidaturaId, EstadoCandidatura.REJEITADA);
+    }
+
+    // Adicionar este método à classe CandidaturaService:
+    public boolean atualizarEstadoCandidatura(int candidaturaId, EstadoCandidatura novoEstado) throws SQLException {
+        Optional<Candidatura> candidaturaOpt = candidaturaRepository.findById(candidaturaId);
+
+        if (candidaturaOpt.isEmpty()) {
+            throw new IllegalArgumentException("Candidatura não encontrada.");
+        }
+
+        Candidatura candidatura = candidaturaOpt.get();
+
+        // Validações específicas
+        if (novoEstado == EstadoCandidatura.ACEITE) {
+            if (!candidatura.isAtiva()) {
+                throw new IllegalArgumentException("A candidatura não está em um estado que permita aceitação.");
+            }
+        }
+
+        // Atualiza o estado
+        return candidaturaRepository.updateEstado(candidaturaId, novoEstado);
     }
 
     // Método para listar candidaturas pendentes
