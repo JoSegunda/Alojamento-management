@@ -76,9 +76,11 @@ public class AlojamentoRepository {
     public List<Alojamento> findAll() throws SQLException {
         List<Alojamento> lista = new ArrayList<>();
         String SQL = "SELECT * FROM alojamento ORDER BY id";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQL);
              ResultSet rs = stmt.executeQuery()) {
+
             while (rs.next()) {
                 lista.add(mapResultSetToAlojamento(rs));
             }

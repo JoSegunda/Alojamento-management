@@ -105,4 +105,20 @@ public class CandidaturaRepository {
             return Optional.empty();
         }
     }
+
+    public Optional<Candidatura> findById(int id) throws SQLException {
+        String SQL = "SELECT * FROM candidatura WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return Optional.of(mapResultSetToCandidatura(rs));
+            }
+            return Optional.empty();
+        }
+    }
 }

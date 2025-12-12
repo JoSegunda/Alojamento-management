@@ -71,7 +71,7 @@ public class CandidaturaService {
         return candidaturaRepository.updateEstado(candidaturaId, EstadoCandidatura.ACEITE);
     }
 
-    public List<Candidatura> findById(int id) throws SQLException {
-        return candidaturaRepository.listarPorCandidato(id);
+    public Optional<Candidatura> findById(int id) throws SQLException {
+        return candidaturaRepository.findById(id);
     }
 }
