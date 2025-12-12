@@ -1,69 +1,73 @@
 package server;
 
-import repository.AlojamentoRepository;
-import repository.CandidatoRepository;
-import repository.CandidaturaRepository;
-import repository.DatabaseConnection;
-import service.AlojamentoService;
-import service.CandidatoService;
-import service.CandidaturaService;
-
+import repository.*;
+import service.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private static final int PORT = 12345;
+    private static final int THREAD_POOL_SIZE = 10;
+    private static boolean running = true;
 
     public static void main(String[] args) {
-        System.out.println("Iniciando Servidor...");
+        System.out.println("╔══════════════════════════════════════════════════╗");
+        System.out.println("║   SERVIDOR DE ALOJAMENTO ESTUDANTIL - ONLINE    ║");
+        System.out.println("╚══════════════════════════════════════════════════╝");
+        System.out.println("🔧 Inicializando serviços...");
 
-        // Inicialização de dos repositórios
-        AlojamentoRepository alojamentoRepository = new AlojamentoRepository();
-        CandidatoRepository candidatoRepository = new CandidatoRepository();
-        CandidaturaRepository candidaturaRepository = new CandidaturaRepository();
-
-        AlojamentoService alojamentoService = new AlojamentoService(alojamentoRepository);
-        CandidaturaService candidaturaService = new CandidaturaService(
-                candidaturaRepository, alojamentoRepository, candidatoRepository
-        );
-        CandidatoService candidatoService = new CandidatoService(candidatoRepository, candidaturaService);
-
-
-        // Testar conexão a base de dados
         try {
-            DatabaseConnection.getConnection();
-        } catch (SQLException e) {
-            System.err.println("ERRO: Falha na conexão com a base de dados. Encerrando o servidor.");
-            return; // Encerra o programa
-        }
+            // Inicializar repositórios
+            AlojamentoRepository alojamentoRepo = new AlojamentoRepository();
+            CandidatoRepository candidatoRepo = new CandidatoRepository();
+            CandidaturaRepository candidaturaRepo = new CandidaturaRepository();
 
-        // Instancia o server socket na porta 12345
-        try(ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Servidor Iniciado na porta " + PORT + ". Aguardando conexões...");
+            // Inicializar serviços
+            AlojamentoService alojamentoService = new AlojamentoService(alojamentoRepo);
+            CandidatoService candidatoService = new CandidatoService(candidatoRepo, null);
+            CandidaturaService candidaturaService = new CandidaturaService(
+                    candidaturaRepo, alojamentoRepo, candidatoRepo
+            );
 
-            while(true){
-                // Accept() bloqueia a execução até que o servidor receba um pedido de conexão
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("Novo cliente conectado");
+            // Atualizar referência circular
+            candidatoService = new CandidatoService(candidatoRepo, candidaturaService);
 
-                // Criar um clientHandler para processar o cliente
-                ClientHandler clientHandler = new ClientHandler(
-                        clientSocket,
-                        alojamentoService,
-                        candidatoService,
-                        candidaturaService
-                );
+            System.out.println("✅ Serviços inicializados com sucesso!");
+            System.out.println("🌐 Aguardando conexões na porta " + PORT + "...");
 
-                //Inicia o handler numa nova Thread
-                Thread thread = new Thread(clientHandler);
-                thread.start();
+            ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+            try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+                while (running) {
+                    try {
+                        Socket clientSocket = serverSocket.accept();
+                        System.out.println("\n🔗 Nova conexão: " +
+                                clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort());
+
+                        ClientHandler handler = new ClientHandler(
+                                clientSocket, alojamentoService, candidatoService, candidaturaService
+                        );
+                        threadPool.execute(handler);
+                    } catch (IOException e) {
+                        if (running) {
+                            System.err.println("⚠️ Erro ao aceitar conexão: " + e.getMessage());
+                        }
+                    }
+                }
             }
-        } catch (IOException e) {
-            System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
-        }finally {
-            DatabaseConnection.closeConnection();
+            threadPool.shutdown();
+        } catch (Exception e) {
+            System.err.println("❌ Erro fatal no servidor: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            System.out.println("🛑 Servidor encerrado.");
         }
+    }
+
+    public static void stopServer() {
+        running = false;
     }
 }
