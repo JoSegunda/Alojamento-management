@@ -17,7 +17,6 @@ public class CandidaturaService {
     private final AlojamentoRepository alojamentoRepository;
     private final CandidatoRepository candidatoRepository;
 
-    // Depende de três repositórios
     public CandidaturaService(CandidaturaRepository candidaturaRepository,
                               AlojamentoRepository alojamentoRepository,
                               CandidatoRepository candidatoRepository) {
@@ -25,10 +24,9 @@ public class CandidaturaService {
         this.alojamentoRepository = alojamentoRepository;
         this.candidatoRepository = candidatoRepository;
     }
-    // Method para submeter candidatura
-    public Candidatura submeterCandidatura(int alojamentoId, int candidatoId) throws IllegalArgumentException, SQLException {
 
-        // Chaves Estrangeiras)
+    // Método para submeter candidatura
+    public Candidatura submeterCandidatura(int alojamentoId, int candidatoId) throws IllegalArgumentException, SQLException {
         Alojamento alojamento = alojamentoRepository.findById(alojamentoId);
         Optional<Candidato> candidatoOpt = candidatoRepository.findById(candidatoId);
 
@@ -38,40 +36,59 @@ public class CandidaturaService {
         if (candidatoOpt.isEmpty()) {
             throw new IllegalArgumentException("Candidato não existe.");
         }
-        // O alojamento deve estar aprovado para receber candidaturas
         if (alojamento.getEstado() != Alojamento.EstadoAlojamento.ATIVO) {
             throw new IllegalArgumentException("O alojamento não está disponível para candidaturas.");
         }
 
-        // Verifica se o candidato já tem uma candidatura ativa para este alojamento
         if (candidaturaRepository.findByAlojamentoAndCandidato(alojamentoId, candidatoId).isPresent()) {
             throw new IllegalArgumentException("O candidato já submeteu uma candidatura para este alojamento.");
         }
+
         Candidatura novaCandidatura = new Candidatura(alojamentoId, candidatoId);
         return candidaturaRepository.save(novaCandidatura);
     }
-    // M para Alterar o estado da candidatura
-    public boolean aceitarCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
 
-        List<Candidatura> candidaturaOpt = candidaturaRepository.listarPorCandidato(candidaturaId);
+    // Método para aceitar candidatura
+    public boolean aceitarCandidatura(int candidaturaId) throws IllegalArgumentException, SQLException {
+        Optional<Candidatura> candidaturaOpt = candidaturaRepository.findById(candidaturaId);
 
         if (candidaturaOpt.isEmpty()) {
             throw new IllegalArgumentException("Candidatura não encontrada.");
         }
-        Candidatura candidatura = candidaturaOpt.getFirst();
 
-        // Só se pode aceitar se o estado atual for SUBMETIDA ou EM_ANALISE
+        Candidatura candidatura = candidaturaOpt.get();
+
         if (!candidatura.isAtiva()) {
             throw new IllegalArgumentException("A candidatura não está em um estado que permita aceitação.");
         }
+
         candidatura.aceitar();
-
-        // 2. TODO: recusar candidaturas.
-
         return candidaturaRepository.updateEstado(candidaturaId, EstadoCandidatura.ACEITE);
     }
 
+    // Método para recusar candidatura
+    public boolean recusarCandidatura(int candidaturaId) throws SQLException {
+        Optional<Candidatura> candidaturaOpt = candidaturaRepository.findById(candidaturaId);
+
+        if (candidaturaOpt.isEmpty()) {
+            throw new IllegalArgumentException("Candidatura não encontrada.");
+        }
+
+        return candidaturaRepository.updateEstado(candidaturaId, EstadoCandidatura.REJEITADA);
+    }
+
+    // Método para listar candidaturas pendentes
+    public List<Candidatura> listarCandidaturasPendentes() throws SQLException {
+        return candidaturaRepository.findByEstado(EstadoCandidatura.SUBMETIDA);
+    }
+
+    // Método para buscar candidatura por ID
     public Optional<Candidatura> findById(int id) throws SQLException {
         return candidaturaRepository.findById(id);
+    }
+
+    // Método para buscar candidaturas por candidato
+    public List<Candidatura> findByCandidatoId(int candidatoId) throws SQLException {
+        return candidaturaRepository.listarPorCandidato(candidatoId);
     }
 }

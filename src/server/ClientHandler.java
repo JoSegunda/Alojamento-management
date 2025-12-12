@@ -4,9 +4,7 @@ import model.Alojamento;
 import model.Alojamento.EstadoAlojamento;
 import model.Candidato;
 import model.Candidatura;
-import repository.AlojamentoRepository;
-import repository.CandidatoRepository;
-import repository.CandidaturaRepository;
+import model.Candidatura.EstadoCandidatura;
 import service.AlojamentoService;
 import service.CandidatoService;
 import service.CandidaturaService;
@@ -23,11 +21,10 @@ public class ClientHandler implements Runnable {
     private final BufferedReader in;
     private final int clientPort;
 
-    // Serviços e Repositórios
+    // Serviços
     private final AlojamentoService alojamentoService;
     private final CandidatoService candidatoService;
     private final CandidaturaService candidaturaService;
-    private final AlojamentoRepository alojamentoRepository;
 
     private boolean isAdmin = false;
 
@@ -40,9 +37,6 @@ public class ClientHandler implements Runnable {
         this.alojamentoService = alojamentoService;
         this.candidatoService = candidatoService;
         this.candidaturaService = candidaturaService;
-
-        // Inicializar repositório para métodos adicionais
-        this.alojamentoRepository = new AlojamentoRepository();
 
         this.out = new PrintWriter(clientSocket.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -88,10 +82,10 @@ public class ClientHandler implements Runnable {
 
             sendMessage(response);
 
-            // Se não for admin, mostrar menu novamente após cada comando
-            if (!isAdmin && !response.contains("ERRO")) {
+            // Mostrar menu novamente após cada comando
+            if (!isAdmin) {
                 sendMessage(getUserMenu());
-            } else if (isAdmin) {
+            } else {
                 sendMessage(getAdminMenu());
             }
         }
@@ -129,7 +123,7 @@ public class ClientHandler implements Runnable {
 
                 case "4":
                 case "LISTAR_CANDIDATURAS":
-                    return "SUCESSO|Lista de candidaturas:\n(Esta funcionalidade será implementada)";
+                    return listarCandidaturasPendentes();
 
                 case "5":
                 case "LISTAR_ALOJAMENTOS":
@@ -199,18 +193,48 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    private String listarCandidaturasPendentes() {
+        try {
+            List<Candidatura> candidaturas = candidaturaService.listarCandidaturasPendentes();
+
+            if (candidaturas.isEmpty()) {
+                return "INFO|Nenhuma candidatura pendente no momento.";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== CANDIDATURAS PENDENTES ===\n");
+
+            for (Candidatura c : candidaturas) {
+                // Obter informações do candidato
+                Optional<Candidato> candidatoOpt = candidatoService.findById(c.getCandidatoId());
+                String nomeCandidato = candidatoOpt.map(Candidato::getNome).orElse("N/A");
+
+                // Obter informações do alojamento
+                Optional<Alojamento> alojamentoOpt = alojamentoService.findById(c.getAlojamentoId());
+                String nomeAlojamento = alojamentoOpt.map(Alojamento::getNome).orElse("N/A");
+
+                sb.append(String.format("ID: %2d | Candidato: %-20s | Alojamento: %-15s | Data: %s\n",
+                        c.getId(), nomeCandidato, nomeAlojamento, c.getDataCandidatura()));
+            }
+
+            return sb.toString();
+        } catch (SQLException e) {
+            return "ERRO|Erro ao listar candidaturas: " + e.getMessage();
+        }
+    }
+
     private String listarTodosAlojamentos() {
         try {
-            List<Alojamento> alojamentos = alojamentoRepository.findAll();
+            List<Alojamento> alojamentos = alojamentoService.listarAlojamentosPorEstado(EstadoAlojamento.ATIVO);
 
             if (alojamentos.isEmpty()) {
-                return "INFO|Nenhum alojamento registado.";
+                return "INFO|Nenhum alojamento disponível.";
             }
 
             StringBuilder sb = new StringBuilder();
             sb.append("=== TODOS OS ALOJAMENTOS ===\n");
             for (Alojamento a : alojamentos) {
-                sb.append(String.format("ID: %2d | %-20s | %-15s | Cap: %3d | Estado: %-10s\n",
+                sb.append(String.format("ID: %2d | %-20s | %-15s | Capacidade: %3d | Estado: %-10s\n",
                         a.getId(), a.getNome(), a.getCidade(), a.getCapacidade(), a.getEstado()));
             }
             return sb.toString();
@@ -230,7 +254,7 @@ public class ClientHandler implements Runnable {
                 case 1:
                     return iniciarCandidatura();
                 case 2:
-                    return "SUCESSO|Para verificar o estado da sua candidatura, contacte a administração.";
+                    return verificarEstadoCandidatura();
                 case 3:
                     return listarAlojamentosDisponiveis();
                 default:
@@ -269,9 +293,18 @@ public class ClientHandler implements Runnable {
 
             Candidato registado = candidatoService.registarCandidato(candidato, alojamentoId);
 
+            // Obter a candidatura criada
+            List<Candidatura> candidaturas = candidaturaService.findByCandidatoId(registado.getId());
+            String candidaturaInfo = "";
+            if (!candidaturas.isEmpty()) {
+                Candidatura ultimaCandidatura = candidaturas.get(0);
+                candidaturaInfo = "\nID da Candidatura: " + ultimaCandidatura.getId() +
+                        "\nEstado da Candidatura: " + ultimaCandidatura.getEstado();
+            }
+
             return "SUCESSO|Candidatura submetida com sucesso!\n" +
-                    "Seu ID de candidato: " + registado.getId() + "\n" +
-                    "Aguarde contato da administração.";
+                    "Seu ID de candidato: " + registado.getId() + candidaturaInfo +
+                    "\nGuarde estes números para consultar o estado da sua candidatura!";
 
         } catch (IOException e) {
             return "ERRO|Erro de comunicação: " + e.getMessage();
@@ -281,6 +314,75 @@ public class ClientHandler implements Runnable {
             return "ERRO|Erro na base de dados: " + e.getMessage();
         } catch (Exception e) {
             return "ERRO|" + e.getMessage();
+        }
+    }
+
+    private String verificarEstadoCandidatura() {
+        try {
+            sendMessage("=== VERIFICAR ESTADO DA CANDIDATURA ===");
+            sendMessage("Digite o ID da sua candidatura:");
+
+            String idStr = in.readLine();
+            if (idStr == null || idStr.trim().isEmpty()) {
+                return "ERRO|ID não fornecido.";
+            }
+
+            int candidaturaId = Integer.parseInt(idStr.trim());
+            Optional<Candidatura> candidaturaOpt = candidaturaService.findById(candidaturaId);
+
+            if (candidaturaOpt.isEmpty()) {
+                return "ERRO|Candidatura não encontrada com o ID: " + candidaturaId;
+            }
+
+            Candidatura candidatura = candidaturaOpt.get();
+
+            // Obter informações do candidato
+            Optional<Candidato> candidatoOpt = candidatoService.findById(candidatura.getCandidatoId());
+            String nomeCandidato = candidatoOpt.map(Candidato::getNome).orElse("N/A");
+
+            // Obter informações do alojamento
+            Optional<Alojamento> alojamentoOpt = alojamentoService.findById(candidatura.getAlojamentoId());
+            String nomeAlojamento = alojamentoOpt.map(Alojamento::getNome).orElse("N/A");
+            String cidadeAlojamento = alojamentoOpt.map(Alojamento::getCidade).orElse("N/A");
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== ESTADO DA SUA CANDIDATURA ===\n");
+            sb.append("ID da Candidatura: ").append(candidatura.getId()).append("\n");
+            sb.append("Candidato: ").append(nomeCandidato).append("\n");
+            sb.append("Alojamento: ").append(nomeAlojamento).append(" - ").append(cidadeAlojamento).append("\n");
+            sb.append("Data da Candidatura: ").append(candidatura.getDataCandidatura()).append("\n");
+
+            // Estado com cor simbólica
+            String estado = candidatura.getEstado().name();
+            String estadoFormatado;
+
+            switch (candidatura.getEstado()) {
+                case ACEITE:
+                    estadoFormatado = "✅ ACEITE - Parabéns! Sua candidatura foi aceite.";
+                    break;
+                case REJEITADA:
+                    estadoFormatado = "❌ REJEITADA - Infelizmente sua candidatura não foi aceite.";
+                    break;
+                case SUBMETIDA:
+                    estadoFormatado = "⏳ SUBMETIDA - Sua candidatura está em análise.";
+                    break;
+                case EM_ANALISE:
+                    estadoFormatado = "🔍 EM ANÁLISE - Sua candidatura está sendo analisada.";
+                    break;
+                default:
+                    estadoFormatado = estado;
+            }
+
+            sb.append("Estado: ").append(estadoFormatado).append("\n");
+
+            return sb.toString();
+
+        } catch (IOException e) {
+            return "ERRO|Erro de comunicação: " + e.getMessage();
+        } catch (NumberFormatException e) {
+            return "ERRO|ID deve ser um número.";
+        } catch (SQLException e) {
+            return "ERRO|Erro ao consultar candidatura: " + e.getMessage();
         }
     }
 

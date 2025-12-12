@@ -14,7 +14,7 @@ public class AdminClient {
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        System.out.println("👑 ADMINISTRADOR - SISTEMA DE ALOJAMENTO");
+        System.out.println("ADMINISTRADOR - SISTEMA DE ALOJAMENTO");
         System.out.println("=========================================");
 
         try {
@@ -30,7 +30,7 @@ public class AdminClient {
             while (running) {
                 // Ler e exibir resposta do servidor
                 String response = readServerResponse();
-                if (response.contains("Até logo") || response.contains("SAIR")) {
+                if (response == null || response.contains("Até logo")) {
                     running = false;
                     continue;
                 }
@@ -63,6 +63,10 @@ public class AdminClient {
         while ((line = in.readLine()) != null) {
             if (line.equals("END")) break;
             response.append(line).append("\n");
+        }
+
+        if (line == null && response.length() == 0) {
+            return null;
         }
 
         System.out.print(response.toString());

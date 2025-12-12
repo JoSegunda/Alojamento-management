@@ -1,14 +1,14 @@
 package repository;
 
 import model.Candidatura;
-import model.Candidatura.EstadoCandidatura; // Importar o ENUM
+import model.Candidatura.EstadoCandidatura;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class CandidaturaRepository {
-    // M auxiliar para mapear um ResultSet para um objeto Candidatura
+
     private Candidatura mapResultSetToCandidatura(ResultSet rs) throws SQLException {
         return new Candidatura(
                 rs.getInt("id"),
@@ -18,10 +18,8 @@ public class CandidaturaRepository {
                 EstadoCandidatura.valueOf(rs.getString("estado").toUpperCase())
         );
     }
-    // Insere uma nova candidatura no PostgreSQL.
-    public Candidatura save(Candidatura candidatura) throws SQLException{
 
-        // Verificar se já existe uma candidatura com este id
+    public Candidatura save(Candidatura candidatura) throws SQLException {
         String checkSQL = "SELECT 1 FROM candidatura WHERE alojamento_id=? AND candidato_id=? AND estado IN ('SUBMETIDA','EM_ANALISE')";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkSQL)) {
@@ -32,7 +30,6 @@ public class CandidaturaRepository {
                 throw new SQLException("Já existe uma candidatura ativa para este alojamento e candidato.");
             }
         }
-
 
         String SQL = "INSERT INTO candidatura (alojamento_id, candidato_id, data_candidatura, estado) VALUES (?, ?, ?, ?) RETURNING id";
 
@@ -54,7 +51,7 @@ public class CandidaturaRepository {
             throw new SQLException("Falha ao obter o ID da candidatura após a inserção.");
         }
     }
-    //Atualiza o estado da candidatura
+
     public boolean updateEstado(int id, EstadoCandidatura novoEstado) throws SQLException {
         String SQL = "UPDATE candidatura SET estado = ? WHERE id = ?";
 
@@ -68,7 +65,7 @@ public class CandidaturaRepository {
             return affectedRows > 0;
         }
     }
-    // M para listar candidatura por candidato
+
     public List<Candidatura> listarPorCandidato(int candidatoId) throws SQLException {
         List<Candidatura> lista = new ArrayList<>();
 
@@ -87,7 +84,6 @@ public class CandidaturaRepository {
         return lista;
     }
 
-    // Verificar se já existe uma candidatura para o mesmo alojamento e candidato
     public Optional<Candidatura> findByAlojamentoAndCandidato(int alojamentoId, int candidatoId) throws SQLException {
         String SQL = "SELECT * FROM candidatura WHERE alojamento_id = ? AND candidato_id = ?";
 
@@ -106,6 +102,7 @@ public class CandidaturaRepository {
         }
     }
 
+    // Método para buscar candidatura por ID
     public Optional<Candidatura> findById(int id) throws SQLException {
         String SQL = "SELECT * FROM candidatura WHERE id = ?";
 
@@ -120,5 +117,23 @@ public class CandidaturaRepository {
             }
             return Optional.empty();
         }
+    }
+
+    // Método para listar candidaturas por estado
+    public List<Candidatura> findByEstado(EstadoCandidatura estado) throws SQLException {
+        List<Candidatura> lista = new ArrayList<>();
+        String SQL = "SELECT * FROM candidatura WHERE estado = ? ORDER BY data_candidatura DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL)) {
+
+            stmt.setString(1, estado.name());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(mapResultSetToCandidatura(rs));
+            }
+        }
+        return lista;
     }
 }
