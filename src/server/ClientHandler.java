@@ -72,6 +72,7 @@ public class ClientHandler implements Runnable {
             input = input.trim();
 
             if (input.equalsIgnoreCase("SAIR") || input.equals("4")) {
+            if (input.equalsIgnoreCase("SAIR") || (!isAdmin && input.equals("4"))) {
                 sendMessage("Até logo! 👋");
                 break;
             }
@@ -406,7 +407,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // ========== MÉTODOS AUXILIARES ==========
     private String getAdminMenu() {
         return """
             ╔══════════════════════════════════════════════════╗
@@ -415,11 +415,11 @@ public class ClientHandler implements Runnable {
             
             COMANDOS:
             1|Nome|Cidade|Capacidade  - Registar novo alojamento
-            2|ID|ESTADO               - Atualizar estado do alojamento
-            3|ID                      - Aceitar candidatura
-            4                         - Listar candidaturas pendentes
-            5                         - Listar todos alojamentos
-            SAIR                      - Encerrar sessão
+            2|ID|ESTADO - Atualizar estado do alojamento
+            3|ID - Aceitar candidatura
+            4 - Listar candidaturas pendentes
+            5 - Listar todos alojamentos
+            SAIR - Encerrar sessão
             
             Exemplos:
             1|Residência X|Porto|100
