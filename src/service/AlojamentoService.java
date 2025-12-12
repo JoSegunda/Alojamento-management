@@ -53,6 +53,10 @@ public class AlojamentoService {
         return alojamentoRepository.updateEstado(alojamentoId, novoEstado);
     }
 
+    public List<Alojamento> listarTodosAlojamentos() throws SQLException {
+        return alojamentoRepository.findAll();
+    }
+
     // Listar alojamentos por estado
     public List<Alojamento> listarAlojamentosPorEstado(EstadoAlojamento estado) throws SQLException {
         if (estado == null) {
